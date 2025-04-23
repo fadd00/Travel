@@ -5,12 +5,12 @@ using System.Data.SqlClient;
 
 namespace Travel
 {
-    public partial class Form1 : Form
+    public partial class Admin : Form
     {
         // Connection string - Using SQL Server
         static string connectionString = "Data Source=FADD00;Database=Travel;Integrated Security=True";
 
-        public Form1()
+        public Admin()
         {
             InitializeComponent();
         }
@@ -183,10 +183,10 @@ namespace Travel
             if (e.RowIndex >= 0)
             {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-                tnama.Text = row.Cells["nama"].Value.ToString();
-                tnohp.Text = row.Cells["telepon"].Value.ToString();
-                temail.Text = row.Cells["email"].Value.ToString();
-                talamat.Text = row.Cells["alamat"].Value.ToString();
+                tnama.Text = row.Cells["nama"].Value?.ToString();
+                tnohp.Text = row.Cells["telepon"].Value?.ToString();
+                temail.Text = row.Cells["email"].Value?.ToString();
+                talamat.Text = row.Cells["alamat"].Value?.ToString();
             }
         }
 

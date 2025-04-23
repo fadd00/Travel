@@ -1,6 +1,6 @@
 ﻿namespace Travel
 {
-    partial class Form1
+    partial class Admin
     {
         private System.Windows.Forms.TextBox tnama; // TextBox for Nama
         private System.Windows.Forms.TextBox tnohp; // TextBox for No hp
@@ -186,6 +186,16 @@
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             ResumeLayout(false);
             PerformLayout();
+
+            // dataGridView1
+            this.dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Location = new Point(12, 221);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.RowHeadersWidth = 51;
+            this.dataGridView1.Size = new Size(963, 200);
+            this.dataGridView1.TabIndex = 5;
+            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
+
         }
         private Label label1;
         private Label label2;
