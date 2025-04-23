@@ -185,6 +185,7 @@ namespace Travel
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 tnama.Text = row.Cells["nama"].Value?.ToString();
                 tnohp.Text = row.Cells["telepon"].Value?.ToString();
+                ttujuan.Text = row.Cells["tujuan"].Value?.ToString();
                 temail.Text = row.Cells["email"].Value?.ToString();
                 talamat.Text = row.Cells["alamat"].Value?.ToString();
             }
