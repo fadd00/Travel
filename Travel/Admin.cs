@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
-using System.Data.SqlClient;
-
+using MySql.Data.MySqlClient;
+using System.Text.RegularExpressions;
 namespace Travel
 {
     public partial class Admin : Form
     {
-        // Connection string - Using SQL Server
-        static string connectionString = "Data Source=FADD00;Database=Travel;Integrated Security=True";
+        // Connection string - Using MySQL
+        static string connectionString = "Server=localhost;Database=travel;Uid=root";
 
         public Admin()
         {
@@ -31,13 +31,13 @@ namespace Travel
 
         private void LoadData()
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = "SELECT * FROM pelanggan";
-                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
+                    MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
                     dataGridView1.DataSource = dt;
@@ -49,29 +49,51 @@ namespace Travel
             }
         }
 
+        // Input validation helper
+        private bool ValidateInput()
+        {
+            // Nama wajib, hanya huruf dan spasi
+            if (string.IsNullOrWhiteSpace(tnama.Text) || !Regex.IsMatch(tnama.Text, @"^[a-zA-Z\s]+$"))
+            {
+                MessageBox.Show("Nama wajib diisi dan hanya boleh huruf dan spasi!");
+                tnama.Focus();
+                return false;
+            }
+
+            // No HP wajib, hanya angka, minimal 10 digit
+            if (string.IsNullOrWhiteSpace(tnohp.Text) || !Regex.IsMatch(tnohp.Text, @"^\d{10,}$"))
+            {
+                MessageBox.Show("No HP wajib diisi, hanya angka, minimal 10 digit!");
+                tnohp.Focus();
+                return false;
+            }
+
+            // Email wajib, format valid
+            if (string.IsNullOrWhiteSpace(temail.Text) || !Regex.IsMatch(temail.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                MessageBox.Show("Email wajib diisi dan harus format email yang valid!");
+                temail.Focus();
+                return false;
+            }
+
+            // Alamat wajib
+            if (string.IsNullOrWhiteSpace(talamat.Text))
+            {
+                MessageBox.Show("Alamat wajib diisi!");
+                talamat.Focus();
+                return false;
+            }
+
+            return true;
+        }
+
         // Add new customer data
         private void btnPesan_Click(object sender, EventArgs e)
         {
-            // Validate input
-            if (string.IsNullOrEmpty(tnama.Text))
-            {
-                MessageBox.Show("Nama tidak boleh kosong!");
+            if (!ValidateInput())
                 return;
-            }
 
-            if (string.IsNullOrEmpty(tnohp.Text))
-            {
-                MessageBox.Show("No hp tidak boleh kosong!");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(temail.Text))
-            {
-                MessageBox.Show("Email tidak boleh kosong!");
-                return;
-            }
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
@@ -79,11 +101,11 @@ namespace Travel
 
                     string query = "INSERT INTO pelanggan (nama, telepon, email, alamat) " +
                                    "VALUES (@nama, @telepon, @email, @alamat)";
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@nama", tnama.Text);
-                    cmd.Parameters.AddWithValue("@telepon", tnohp.Text);
-                    cmd.Parameters.AddWithValue("@email", temail.Text);
-                    cmd.Parameters.AddWithValue("@alamat", talamat.Text);
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@nama", tnama.Text.Trim());
+                    cmd.Parameters.AddWithValue("@telepon", tnohp.Text.Trim());
+                    cmd.Parameters.AddWithValue("@email", temail.Text.Trim());
+                    cmd.Parameters.AddWithValue("@alamat", talamat.Text.Trim());
                     cmd.ExecuteNonQuery();
 
                     MessageBox.Show("Customer data saved successfully!");
@@ -106,7 +128,10 @@ namespace Travel
                 return;
             }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            if (!ValidateInput())
+                return;
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
@@ -114,12 +139,12 @@ namespace Travel
 
                     string query = "UPDATE pelanggan SET nama = @nama, telepon = @telepon, email = @email, alamat = @alamat " +
                                    "WHERE id_pelanggan = @id_pelanggan";
-                    SqlCommand cmd = new SqlCommand(query, conn);
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@id_pelanggan", dataGridView1.SelectedRows[0].Cells["id_pelanggan"].Value);
-                    cmd.Parameters.AddWithValue("@nama", tnama.Text);
-                    cmd.Parameters.AddWithValue("@telepon", tnohp.Text);
-                    cmd.Parameters.AddWithValue("@email", temail.Text);
-                    cmd.Parameters.AddWithValue("@alamat", talamat.Text);
+                    cmd.Parameters.AddWithValue("@nama", tnama.Text.Trim());
+                    cmd.Parameters.AddWithValue("@telepon", tnohp.Text.Trim());
+                    cmd.Parameters.AddWithValue("@email", temail.Text.Trim());
+                    cmd.Parameters.AddWithValue("@alamat", talamat.Text.Trim());
                     cmd.ExecuteNonQuery();
 
                     MessageBox.Show("Customer data updated successfully!");
@@ -147,13 +172,13 @@ namespace Travel
 
             if (result == DialogResult.Yes)
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
                     try
                     {
                         conn.Open();
                         string query = "DELETE FROM pelanggan WHERE id_pelanggan = @id_pelanggan";
-                        SqlCommand cmd = new SqlCommand(query, conn);
+                        MySqlCommand cmd = new MySqlCommand(query, conn);
                         cmd.Parameters.AddWithValue("@id_pelanggan", dataGridView1.SelectedRows[0].Cells["id_pelanggan"].Value);
                         cmd.ExecuteNonQuery();
 
