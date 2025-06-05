@@ -7,7 +7,7 @@ namespace Travel
 {
     public partial class reservasi : Form
     {
-        static string connectionString = "Server=localhost;Database=travel;Uid=root";
+        static string connectionString = "Data Source=localhost;Initial Catalog=travel;Integrated Security=True";
 
         public reservasi()
         {
@@ -25,10 +25,10 @@ namespace Travel
         private void LoadPelanggan()
         {
             cbPelanggan.Items.Clear();
-            using (var conn = new MySqlConnection(connectionString))
+            using (var conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                var cmd = new MySqlCommand("SELECT id_pelanggan, nama FROM pelanggan", conn);
+                var cmd = new SqlCommand("SELECT id_pelanggan, nama FROM pelanggan", conn);
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -42,10 +42,10 @@ namespace Travel
         private void LoadJadwal()
         {
             cbJadwal.Items.Clear();
-            using (var conn = new MySqlConnection(connectionString))
+            using (var conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                var cmd = new MySqlCommand("SELECT id_jadwal, tujuan FROM jadwal", conn);
+                var cmd = new SqlCommand("SELECT id_jadwal, tujuan FROM jadwal", conn);
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -58,13 +58,13 @@ namespace Travel
 
         private void LoadData()
         {
-            using (var conn = new MySqlConnection(connectionString))
+            using (var conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = "SELECT * FROM reservasi";
-                    MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn);
+                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
                     dataGridView1.DataSource = dt;
@@ -125,14 +125,14 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (var conn = new MySqlConnection(connectionString))
+            using (var conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = @"INSERT INTO reservasi (id_pelanggan, id_jadwal, jumlah_tiket, total_harga, status)
-                                     VALUES (@id_pelanggan, @id_jadwal, @jumlah_tiket, @total_harga, @status)";
-                    var cmd = new MySqlCommand(query, conn);
+                                         VALUES (@id_pelanggan, @id_jadwal, @jumlah_tiket, @total_harga, @status)";
+                    var cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@id_pelanggan", ((ComboBoxItem)cbPelanggan.SelectedItem).Value);
                     cmd.Parameters.AddWithValue("@id_jadwal", ((ComboBoxItem)cbJadwal.SelectedItem).Value);
                     cmd.Parameters.AddWithValue("@jumlah_tiket", int.Parse(tJumlahTiket.Text.Trim()));
@@ -161,14 +161,14 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (var conn = new MySqlConnection(connectionString))
+            using (var conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = @"UPDATE reservasi SET id_pelanggan=@id_pelanggan, id_jadwal=@id_jadwal, jumlah_tiket=@jumlah_tiket, 
-                                     total_harga=@total_harga, status=@status WHERE id_reservasi=@id";
-                    var cmd = new MySqlCommand(query, conn);
+                                         total_harga=@total_harga, status=@status WHERE id_reservasi=@id";
+                    var cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_reservasi"].Value);
                     cmd.Parameters.AddWithValue("@id_pelanggan", ((ComboBoxItem)cbPelanggan.SelectedItem).Value);
                     cmd.Parameters.AddWithValue("@id_jadwal", ((ComboBoxItem)cbJadwal.SelectedItem).Value);
@@ -201,13 +201,13 @@ namespace Travel
 
             if (result == DialogResult.Yes)
             {
-                using (var conn = new MySqlConnection(connectionString))
+                using (var conn = new SqlConnection(connectionString))
                 {
                     try
                     {
                         conn.Open();
                         string query = "DELETE FROM reservasi WHERE id_reservasi = @id";
-                        var cmd = new MySqlCommand(query, conn);
+                        var cmd = new SqlCommand(query, conn);
                         cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_reservasi"].Value);
                         cmd.ExecuteNonQuery();
 
@@ -235,7 +235,6 @@ namespace Travel
             if (e.RowIndex >= 0)
             {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-                // Set pelanggan
                 foreach (ComboBoxItem item in cbPelanggan.Items)
                 {
                     if (item.Value == row.Cells["id_pelanggan"].Value.ToString())
@@ -244,7 +243,6 @@ namespace Travel
                         break;
                     }
                 }
-                // Set jadwal
                 foreach (ComboBoxItem item in cbJadwal.Items)
                 {
                     if (item.Value == row.Cells["id_jadwal"].Value.ToString())

@@ -7,7 +7,7 @@ namespace Travel
 {
     public partial class mobil : Form
     {
-        static string connectionString = "Server=localhost;Database=travel;Uid=root";
+        static string connectionString = "Data Source=localhost;Initial Catalog=travel;Integrated Security=True";
 
         public mobil()
         {
@@ -35,13 +35,13 @@ namespace Travel
 
         private void LoadData()
         {
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = "SELECT * FROM jadwal";
-                    MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn);
+                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
                     dataGridView1.DataSource = dt;
@@ -111,15 +111,15 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = @"INSERT INTO jadwal 
-                            (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status)
-                            VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                                (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status)
+                                VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
+                    SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
                     cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
                     cmd.Parameters.AddWithValue("@waktu", TimeSpan.Parse(twaktu.Text.Trim()));
@@ -152,16 +152,16 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = @"UPDATE jadwal SET 
-                            tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, 
-                            merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status
-                            WHERE id_jadwal=@id";
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                                tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, 
+                                merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status
+                                WHERE id_jadwal=@id";
+                    SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
                     cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
@@ -198,13 +198,13 @@ namespace Travel
 
             if (result == DialogResult.Yes)
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     try
                     {
                         conn.Open();
                         string query = "DELETE FROM jadwal WHERE id_jadwal = @id";
-                        MySqlCommand cmd = new MySqlCommand(query, conn);
+                        SqlCommand cmd = new SqlCommand(query, conn);
                         cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                         cmd.ExecuteNonQuery();
 
@@ -233,7 +233,6 @@ namespace Travel
             {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 ttujuan.Text = row.Cells["tujuan"].Value?.ToString();
-                // Set ttanggal.Value if possible, else fallback to today
                 if (row.Cells["tanggal"].Value != null && DateTime.TryParse(row.Cells["tanggal"].Value.ToString(), out DateTime tgl))
                     ttanggal.Value = tgl;
                 else

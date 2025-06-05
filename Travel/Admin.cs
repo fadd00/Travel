@@ -1,43 +1,48 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient;
 using System.Text.RegularExpressions;
+
 namespace Travel
 {
-    public partial class Admin : Form
+    public partial class mobil : Form
     {
-        // Connection string - Using MySQL
-        static string connectionString = "Server=localhost;Database=travel;Uid=root";
+        static string connectionString = "Data Source=localhost;Initial Catalog=travel;Integrated Security=True";
 
-        public Admin()
+        public mobil()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void mobil_Load(object sender, EventArgs e)
         {
             LoadData();
         }
 
         private void ClearForm()
         {
-            tnama.Clear();
-            tnohp.Clear();
-            temail.Clear();
-            talamat.Clear();
-            tnama.Focus();
+            ttujuan.Clear();
+            ttanggal.Value = DateTime.Today;
+            twaktu.Text = "";
+            tharga.Text = "";
+            tkapasitas.Text = "";
+            tmerk.Text = "";
+            tmodel.Text = "";
+            tplat.Text = "";
+            tstatus.SelectedIndex = 0;
+            ttujuan.Focus();
         }
 
         private void LoadData()
         {
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-                    string query = "SELECT * FROM pelanggan";
-                    MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn);
+                    string query = "SELECT * FROM jadwal";
+                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
                     dataGridView1.DataSource = dt;
@@ -49,77 +54,95 @@ namespace Travel
             }
         }
 
-        // Input validation helper
         private bool ValidateInput()
         {
-            // Nama wajib, hanya huruf dan spasi
-            if (string.IsNullOrWhiteSpace(tnama.Text) || !Regex.IsMatch(tnama.Text, @"^[a-zA-Z\s]+$"))
+            if (string.IsNullOrWhiteSpace(ttujuan.Text))
             {
-                MessageBox.Show("Nama wajib diisi dan hanya boleh huruf dan spasi!");
-                tnama.Focus();
+                MessageBox.Show("Tujuan wajib diisi!");
+                ttujuan.Focus();
                 return false;
             }
-
-            // No HP wajib, hanya angka, minimal 10 digit
-            if (string.IsNullOrWhiteSpace(tnohp.Text) || !Regex.IsMatch(tnohp.Text, @"^\d{10,}$"))
+            if (string.IsNullOrWhiteSpace(twaktu.Text))
             {
-                MessageBox.Show("No HP wajib diisi, hanya angka, minimal 10 digit!");
-                tnohp.Focus();
+                MessageBox.Show("Waktu wajib diisi!");
+                twaktu.Focus();
                 return false;
             }
-
-            // Email wajib, format valid
-            if (string.IsNullOrWhiteSpace(temail.Text) || !Regex.IsMatch(temail.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            if (string.IsNullOrWhiteSpace(tharga.Text) || !decimal.TryParse(tharga.Text, out _))
             {
-                MessageBox.Show("Email wajib diisi dan harus format email yang valid!");
-                temail.Focus();
+                MessageBox.Show("Harga wajib diisi dan harus angka desimal!");
+                tharga.Focus();
                 return false;
             }
-
-            // Alamat wajib
-            if (string.IsNullOrWhiteSpace(talamat.Text))
+            if (string.IsNullOrWhiteSpace(tkapasitas.Text) || !int.TryParse(tkapasitas.Text, out _))
             {
-                MessageBox.Show("Alamat wajib diisi!");
-                talamat.Focus();
+                MessageBox.Show("Kapasitas wajib diisi dan harus angka!");
+                tkapasitas.Focus();
                 return false;
             }
-
+            if (string.IsNullOrWhiteSpace(tmerk.Text))
+            {
+                MessageBox.Show("Merk mobil wajib diisi!");
+                tmerk.Focus();
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(tmodel.Text))
+            {
+                MessageBox.Show("Model mobil wajib diisi!");
+                tmodel.Focus();
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(tplat.Text))
+            {
+                MessageBox.Show("Plat nomor wajib diisi!");
+                tplat.Focus();
+                return false;
+            }
+            if (tstatus.SelectedIndex < 0)
+            {
+                MessageBox.Show("Status wajib dipilih!");
+                tstatus.Focus();
+                return false;
+            }
             return true;
         }
 
-        // Add new customer data
-        private void btnPesan_Click(object sender, EventArgs e)
+        private void btnTambah_Click(object sender, EventArgs e)
         {
             if (!ValidateInput())
                 return;
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-
-                    string query = "INSERT INTO pelanggan (nama, telepon, email, alamat) " +
-                                   "VALUES (@nama, @telepon, @email, @alamat)";
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@nama", tnama.Text.Trim());
-                    cmd.Parameters.AddWithValue("@telepon", tnohp.Text.Trim());
-                    cmd.Parameters.AddWithValue("@email", temail.Text.Trim());
-                    cmd.Parameters.AddWithValue("@alamat", talamat.Text.Trim());
+                    string query = @"INSERT INTO jadwal 
+                            (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status)
+                            VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
+                    cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
+                    cmd.Parameters.AddWithValue("@waktu", TimeSpan.Parse(twaktu.Text.Trim()));
+                    cmd.Parameters.AddWithValue("@harga", decimal.Parse(tharga.Text.Trim()));
+                    cmd.Parameters.AddWithValue("@kapasitas", int.Parse(tkapasitas.Text.Trim()));
+                    cmd.Parameters.AddWithValue("@merk", tmerk.Text.Trim());
+                    cmd.Parameters.AddWithValue("@model", tmodel.Text.Trim());
+                    cmd.Parameters.AddWithValue("@plat", tplat.Text.Trim());
+                    cmd.Parameters.AddWithValue("@status", tstatus.SelectedItem.ToString());
                     cmd.ExecuteNonQuery();
 
-                    MessageBox.Show("Customer data saved successfully!");
+                    MessageBox.Show("Data jadwal berhasil ditambah!");
                     ClearForm();
                     LoadData();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to save data: " + ex.Message);
+                    MessageBox.Show("Gagal menambah data: " + ex.Message);
                 }
             }
         }
 
-        // Update existing customer data
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             if (dataGridView1.SelectedRows.Count == 0)
@@ -127,38 +150,42 @@ namespace Travel
                 MessageBox.Show("Pilih data yang akan diupdate!");
                 return;
             }
-
             if (!ValidateInput())
                 return;
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-
-                    string query = "UPDATE pelanggan SET nama = @nama, telepon = @telepon, email = @email, alamat = @alamat " +
-                                   "WHERE id_pelanggan = @id_pelanggan";
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@id_pelanggan", dataGridView1.SelectedRows[0].Cells["id_pelanggan"].Value);
-                    cmd.Parameters.AddWithValue("@nama", tnama.Text.Trim());
-                    cmd.Parameters.AddWithValue("@telepon", tnohp.Text.Trim());
-                    cmd.Parameters.AddWithValue("@email", temail.Text.Trim());
-                    cmd.Parameters.AddWithValue("@alamat", talamat.Text.Trim());
+                    string query = @"UPDATE jadwal SET 
+                            tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, 
+                            merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status
+                            WHERE id_jadwal=@id";
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
+                    cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
+                    cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
+                    cmd.Parameters.AddWithValue("@waktu", TimeSpan.Parse(twaktu.Text.Trim()));
+                    cmd.Parameters.AddWithValue("@harga", decimal.Parse(tharga.Text.Trim()));
+                    cmd.Parameters.AddWithValue("@kapasitas", int.Parse(tkapasitas.Text.Trim()));
+                    cmd.Parameters.AddWithValue("@merk", tmerk.Text.Trim());
+                    cmd.Parameters.AddWithValue("@model", tmodel.Text.Trim());
+                    cmd.Parameters.AddWithValue("@plat", tplat.Text.Trim());
+                    cmd.Parameters.AddWithValue("@status", tstatus.SelectedItem.ToString());
                     cmd.ExecuteNonQuery();
 
-                    MessageBox.Show("Customer data updated successfully!");
+                    MessageBox.Show("Data jadwal berhasil diupdate!");
                     ClearForm();
                     LoadData();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to update data: " + ex.Message);
+                    MessageBox.Show("Gagal update data: " + ex.Message);
                 }
             }
         }
 
-        // Delete customer data
         private void btnDelete_Click(object sender, EventArgs e)
         {
             if (dataGridView1.SelectedRows.Count == 0)
@@ -172,29 +199,28 @@ namespace Travel
 
             if (result == DialogResult.Yes)
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     try
                     {
                         conn.Open();
-                        string query = "DELETE FROM pelanggan WHERE id_pelanggan = @id_pelanggan";
-                        MySqlCommand cmd = new MySqlCommand(query, conn);
-                        cmd.Parameters.AddWithValue("@id_pelanggan", dataGridView1.SelectedRows[0].Cells["id_pelanggan"].Value);
+                        string query = "DELETE FROM jadwal WHERE id_jadwal = @id";
+                        SqlCommand cmd = new SqlCommand(query, conn);
+                        cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                         cmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Customer data deleted successfully!");
+                        MessageBox.Show("Data jadwal berhasil dihapus!");
                         ClearForm();
                         LoadData();
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Failed to delete data: " + ex.Message);
+                        MessageBox.Show("Gagal hapus data: " + ex.Message);
                     }
                 }
             }
         }
 
-        // Refresh the data grid
         private void btnRefresh_Click(object sender, EventArgs e)
         {
             LoadData();
@@ -202,23 +228,24 @@ namespace Travel
             MessageBox.Show("Data refreshed successfully!");
         }
 
-        // Handle cell click in DataGridView to populate form fields
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-                tnama.Text = row.Cells["nama"].Value?.ToString();
-                tnohp.Text = row.Cells["telepon"].Value?.ToString();
                 ttujuan.Text = row.Cells["tujuan"].Value?.ToString();
-                temail.Text = row.Cells["email"].Value?.ToString();
-                talamat.Text = row.Cells["alamat"].Value?.ToString();
+                if (row.Cells["tanggal"].Value != null && DateTime.TryParse(row.Cells["tanggal"].Value.ToString(), out DateTime tgl))
+                    ttanggal.Value = tgl;
+                else
+                    ttanggal.Value = DateTime.Today;
+                twaktu.Text = row.Cells["waktu"].Value?.ToString();
+                tharga.Text = row.Cells["harga"].Value?.ToString();
+                tkapasitas.Text = row.Cells["kapasitas"].Value?.ToString();
+                tmerk.Text = row.Cells["merk_mobil"].Value?.ToString();
+                tmodel.Text = row.Cells["model_mobil"].Value?.ToString();
+                tplat.Text = row.Cells["plat_nomor"].Value?.ToString();
+                tstatus.SelectedItem = row.Cells["status"].Value?.ToString();
             }
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }
