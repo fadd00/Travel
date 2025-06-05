@@ -10,7 +10,7 @@
         {
             this.btnAdmin = new System.Windows.Forms.Button();
             this.btnMobil = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            this.SuspendLayout(); 
             // 
             // btnAdmin
             // 
