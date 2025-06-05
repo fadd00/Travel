@@ -35,51 +35,52 @@
             // 
             // tnama
             // 
-            tnama.Location = new Point(354, 20);
+            tnama.Location = new Point(57, 17);
             tnama.Name = "tnama";
-            tnama.Size = new Size(331, 27);
+            tnama.Size = new Size(329, 23);
             tnama.TabIndex = 0;
             // 
             // tnohp
             // 
-            tnohp.Location = new Point(354, 50);
+            tnohp.Location = new Point(57, 47);
             tnohp.Name = "tnohp";
-            tnohp.Size = new Size(331, 27);
+            tnohp.Size = new Size(329, 23);
             tnohp.TabIndex = 1;
             // 
             // ttujuan
             // 
-            ttujuan.Location = new Point(354, 80);
+            ttujuan.Location = new Point(57, 77);
             ttujuan.Name = "ttujuan";
-            ttujuan.Size = new Size(331, 27);
+            ttujuan.Size = new Size(329, 23);
             ttujuan.TabIndex = 2;
             // 
             // temail
             // 
-            temail.Location = new Point(354, 110);
+            temail.Location = new Point(57, 107);
             temail.Name = "temail";
-            temail.Size = new Size(331, 27);
+            temail.Size = new Size(329, 23);
             temail.TabIndex = 3;
             // 
             // talamat
             // 
-            talamat.Location = new Point(354, 140);
+            talamat.Location = new Point(57, 137);
             talamat.Name = "talamat";
-            talamat.Size = new Size(331, 27);
+            talamat.Size = new Size(329, 23);
             talamat.TabIndex = 4;
             // 
             // dataGridView1
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(12, 221);
+            dataGridView1.Location = new Point(12, 178);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.Size = new Size(963, 200);
+            dataGridView1.Size = new Size(495, 162);
             dataGridView1.TabIndex = 5;
+            dataGridView1.CellClick += dataGridView1_CellClick;
             // 
             // btnAdd
             // 
-            btnAdd.Location = new Point(868, 20);
+            btnAdd.Location = new Point(392, 12);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(115, 30);
             btnAdd.TabIndex = 6;
@@ -89,7 +90,7 @@
             // 
             // btnUpdate
             // 
-            btnUpdate.Location = new Point(868, 60);
+            btnUpdate.Location = new Point(392, 52);
             btnUpdate.Name = "btnUpdate";
             btnUpdate.Size = new Size(115, 30);
             btnUpdate.TabIndex = 7;
@@ -99,7 +100,7 @@
             // 
             // btnDelete
             // 
-            btnDelete.Location = new Point(868, 100);
+            btnDelete.Location = new Point(392, 92);
             btnDelete.Name = "btnDelete";
             btnDelete.Size = new Size(115, 30);
             btnDelete.TabIndex = 8;
@@ -109,7 +110,7 @@
             // 
             // btnRefresh
             // 
-            btnRefresh.Location = new Point(868, 140);
+            btnRefresh.Location = new Point(392, 132);
             btnRefresh.Name = "btnRefresh";
             btnRefresh.Size = new Size(115, 30);
             btnRefresh.TabIndex = 9;
@@ -120,36 +121,36 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(108, 20);
+            label1.Location = new Point(12, 20);
             label1.Name = "label1";
-            label1.Size = new Size(49, 20);
+            label1.Size = new Size(39, 15);
             label1.TabIndex = 10;
             label1.Text = "Nama";
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(108, 140);
+            label2.Location = new Point(12, 140);
             label2.Name = "label2";
-            label2.Size = new Size(57, 20);
+            label2.Size = new Size(45, 15);
             label2.TabIndex = 11;
             label2.Text = "Alamat";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(108, 110);
+            label3.Location = new Point(12, 110);
             label3.Name = "label3";
-            label3.Size = new Size(46, 20);
+            label3.Size = new Size(36, 15);
             label3.TabIndex = 12;
             label3.Text = "Email";
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(108, 80);
+            label4.Location = new Point(12, 80);
             label4.Name = "label4";
-            label4.Size = new Size(53, 20);
+            label4.Size = new Size(43, 15);
             label4.TabIndex = 13;
             label4.Text = "Tujuan";
             label4.Click += label4_Click;
@@ -157,15 +158,15 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(108, 50);
+            label5.Location = new Point(12, 50);
             label5.Name = "label5";
-            label5.Size = new Size(54, 20);
+            label5.Size = new Size(44, 15);
             label5.TabIndex = 14;
             label5.Text = "NO HP";
             // 
-            // Form1
+            // Admin
             // 
-            ClientSize = new Size(998, 450);
+            ClientSize = new Size(529, 351);
             Controls.Add(label5);
             Controls.Add(label4);
             Controls.Add(label3);
@@ -181,20 +182,11 @@
             Controls.Add(btnUpdate);
             Controls.Add(btnDelete);
             Controls.Add(btnRefresh);
-            Name = "Form1";
+            Name = "Admin";
             Text = "Travel Management";
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             ResumeLayout(false);
             PerformLayout();
-
-            // dataGridView1
-            this.dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new Point(12, 221);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersWidth = 51;
-            this.dataGridView1.Size = new Size(963, 200);
-            this.dataGridView1.TabIndex = 5;
-            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
 
         }
         private Label label1;
