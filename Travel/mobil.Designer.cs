@@ -17,6 +17,7 @@
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.TextBox tharga; // Tambahan untuk harga
+        private Button btnImport;
 
         private void InitializeComponent()
         {
@@ -34,12 +35,13 @@
             btnDelete = new Button();
             btnRefresh = new Button();
             tharga = new TextBox();
+            btnImport = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
             // ttujuan
             // 
-            ttujuan.Location = new Point(27, 248);
+            ttujuan.Location = new Point(27, 167);
             ttujuan.Name = "ttujuan";
             ttujuan.Size = new Size(200, 23);
             ttujuan.TabIndex = 0;
@@ -47,8 +49,8 @@
             // 
             // ttanggal
             // 
-            ttanggal = new DateTimePicker();
-            ttanggal.Location = new Point(160, 70);
+            ttanggal.Format = DateTimePickerFormat.Short;
+            ttanggal.Location = new Point(27, 53);
             ttanggal.Name = "ttanggal";
             ttanggal.Size = new Size(200, 23);
             ttanggal.TabIndex = 1;
@@ -63,7 +65,7 @@
             // 
             // tkapasitas
             // 
-            tkapasitas.Location = new Point(160, 201);
+            tkapasitas.Location = new Point(27, 138);
             tkapasitas.Name = "tkapasitas";
             tkapasitas.Size = new Size(200, 23);
             tkapasitas.TabIndex = 3;
@@ -71,7 +73,7 @@
             // 
             // tmerk
             // 
-            tmerk.Location = new Point(85, 302);
+            tmerk.Location = new Point(27, 225);
             tmerk.Name = "tmerk";
             tmerk.Size = new Size(200, 23);
             tmerk.TabIndex = 4;
@@ -79,7 +81,7 @@
             // 
             // tmodel
             // 
-            tmodel.Location = new Point(27, 131);
+            tmodel.Location = new Point(27, 82);
             tmodel.Name = "tmodel";
             tmodel.Size = new Size(200, 23);
             tmodel.TabIndex = 5;
@@ -87,9 +89,9 @@
             // 
             // tplat
             // 
-            tplat.Location = new Point(279, 248);
+            tplat.Location = new Point(27, 196);
             tplat.Name = "tplat";
-            tplat.Size = new Size(177, 23);
+            tplat.Size = new Size(200, 23);
             tplat.TabIndex = 6;
             tplat.Text = "plat";
             // 
@@ -97,13 +99,7 @@
             // 
             tstatus.DropDownStyle = ComboBoxStyle.DropDownList;
             tstatus.Items.AddRange(new object[] { "tersedia", "penuh", "batal" });
-            ttanggal = new DateTimePicker();
-            ttanggal.Location = new Point(160, 70);
-            ttanggal.Name = "ttanggal";
-            ttanggal.Size = new Size(200, 23);
-            ttanggal.TabIndex = 1;
-            ttanggal.Format = DateTimePickerFormat.Short; // atau sesuai kebutuhan
-            tstatus.Location = new Point(335, 327);
+            tstatus.Location = new Point(345, 138);
             tstatus.Name = "tstatus";
             tstatus.Size = new Size(121, 23);
             tstatus.TabIndex = 7;
@@ -156,11 +152,20 @@
             // 
             // tharga
             // 
-            tharga.Location = new Point(279, 161);
+            tharga.Location = new Point(27, 109);
             tharga.Name = "tharga";
-            tharga.Size = new Size(177, 23);
+            tharga.Size = new Size(200, 23);
             tharga.TabIndex = 13;
             tharga.Text = "harga";
+            // 
+            // btnImport
+            // 
+            btnImport.Location = new Point(375, 276);
+            btnImport.Name = "btnImport";
+            btnImport.Size = new Size(80, 30);
+            btnImport.TabIndex = 14;
+            btnImport.Text = "Import Excel";
+            btnImport.Click += btnImport_Click;
             // 
             // mobil
             // 
@@ -179,11 +184,13 @@
             Controls.Add(btnUpdate);
             Controls.Add(btnDelete);
             Controls.Add(btnRefresh);
+            Controls.Add(btnImport);
             Name = "mobil";
             Load += mobil_Load;
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             ResumeLayout(false);
             PerformLayout();
+
         }
     }
 }

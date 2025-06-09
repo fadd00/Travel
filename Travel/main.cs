@@ -16,6 +16,11 @@ namespace Travel
         {
             InitializeComponent();
         }
+        private void btnReservasi_Click(object sender, EventArgs e)
+        {
+            reservasi reservasiform = new reservasi();
+            reservasiform.Show();
+        }
 
         private void btnAdmin_Click(object sender, EventArgs e)
         {

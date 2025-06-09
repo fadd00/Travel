@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Data;
+using System.IO;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using System.Text.RegularExpressions;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 namespace Travel
 {
     public partial class mobil : Form
     {
-        static string connectionString = "Data Source=localhost;Initial Catalog=travel;Integrated Security=True";
+        static string connectionString = "Server=localhost;Database=travel;Uid=root";
 
         public mobil()
         {
@@ -35,13 +38,13 @@ namespace Travel
 
         private void LoadData()
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = "SELECT * FROM jadwal";
-                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
+                    MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
                     dataGridView1.DataSource = dt;
@@ -111,15 +114,15 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = @"INSERT INTO jadwal 
-                                (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status)
-                                VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
-                    SqlCommand cmd = new SqlCommand(query, conn);
+                            (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status)
+                            VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
                     cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
                     cmd.Parameters.AddWithValue("@waktu", TimeSpan.Parse(twaktu.Text.Trim()));
@@ -152,16 +155,16 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
                     string query = @"UPDATE jadwal SET 
-                                tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, 
-                                merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status
-                                WHERE id_jadwal=@id";
-                    SqlCommand cmd = new SqlCommand(query, conn);
+                            tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, 
+                            merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status
+                            WHERE id_jadwal=@id";
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
                     cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
@@ -198,13 +201,13 @@ namespace Travel
 
             if (result == DialogResult.Yes)
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
                     try
                     {
                         conn.Open();
                         string query = "DELETE FROM jadwal WHERE id_jadwal = @id";
-                        SqlCommand cmd = new SqlCommand(query, conn);
+                        MySqlCommand cmd = new MySqlCommand(query, conn);
                         cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                         cmd.ExecuteNonQuery();
 
@@ -233,6 +236,7 @@ namespace Travel
             {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 ttujuan.Text = row.Cells["tujuan"].Value?.ToString();
+                // Set ttanggal.Value if possible, else fallback to today
                 if (row.Cells["tanggal"].Value != null && DateTime.TryParse(row.Cells["tanggal"].Value.ToString(), out DateTime tgl))
                     ttanggal.Value = tgl;
                 else
@@ -246,5 +250,93 @@ namespace Travel
                 tstatus.SelectedItem = row.Cells["status"].Value?.ToString();
             }
         }
+
+        private void btnImport_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (OpenFileDialog ofd = new OpenFileDialog())
+                {
+                    ofd.Filter = "Excel Files|*.xlsx;*.xls";
+                    ofd.Title = "Pilih File Excel";
+
+                    if (ofd.ShowDialog() == DialogResult.OK)
+                    {
+                        PreviewData(ofd.FileName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error membuka file: {ex.Message}", "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void PreviewData(string filePath)
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                dt.Columns.Add("tujuan", typeof(string));
+                dt.Columns.Add("tanggal", typeof(DateTime));
+                dt.Columns.Add("waktu", typeof(string));
+                dt.Columns.Add("harga", typeof(decimal));
+                dt.Columns.Add("kapasitas", typeof(int));
+                dt.Columns.Add("merk_mobil", typeof(string));
+                dt.Columns.Add("model_mobil", typeof(string));
+                dt.Columns.Add("plat_nomor", typeof(string));
+                dt.Columns.Add("status", typeof(string));
+
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    IWorkbook workbook;
+
+                    if (Path.GetExtension(filePath).ToLower() == ".xlsx")
+                    {
+                        workbook = new XSSFWorkbook(fs);
+                    }
+                    else
+                    {
+                        throw new Exception("Format file tidak didukung. Gunakan .xlsx");
+                    }
+
+                    ISheet sheet = workbook.GetSheetAt(0);
+
+                    for (int row = 1; row <= sheet.LastRowNum; row++)
+                    {
+                        IRow excelRow = sheet.GetRow(row);
+                        if (excelRow != null)
+                        {
+                            DataRow dataRow = dt.NewRow();
+
+                            dataRow["tujuan"] = excelRow.GetCell(0)?.ToString() ?? string.Empty;
+                            dataRow["tanggal"] = DateTime.TryParse(excelRow.GetCell(1)?.ToString(), out var tgl) ? tgl : DateTime.Today;
+                            dataRow["waktu"] = excelRow.GetCell(2)?.ToString() ?? string.Empty;
+                            dataRow["harga"] = decimal.TryParse(excelRow.GetCell(3)?.ToString(), out var harga) ? harga : 0;
+                            dataRow["kapasitas"] = int.TryParse(excelRow.GetCell(4)?.ToString(), out var kapasitas) ? kapasitas : 0;
+                            dataRow["merk_mobil"] = excelRow.GetCell(5)?.ToString() ?? string.Empty;
+                            dataRow["model_mobil"] = excelRow.GetCell(6)?.ToString() ?? string.Empty;
+                            dataRow["plat_nomor"] = excelRow.GetCell(7)?.ToString() ?? string.Empty;
+                            dataRow["status"] = excelRow.GetCell(8)?.ToString() ?? string.Empty;
+
+                            dt.Rows.Add(dataRow);
+                        }
+                    }
+                }
+
+                // Tampilkan PreviewForm tanpa cache
+                PreviewForm previewForm = new PreviewForm(dt, connectionString);
+                if (previewForm.ShowDialog() == DialogResult.OK)
+                {
+                    LoadData();
+                    MessageBox.Show("Data jadwal berhasil diimport!", "Import Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error membaca file: {ex.Message}", "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
+

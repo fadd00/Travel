@@ -26,82 +26,114 @@
             btnUpdate = new Button();
             btnDelete = new Button();
             btnRefresh = new Button();
-
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            SuspendLayout();
+            // 
             // cbPelanggan
-            cbPelanggan.Location = new System.Drawing.Point(30, 30);
+            // 
+            cbPelanggan.Location = new Point(30, 30);
             cbPelanggan.Name = "cbPelanggan";
-            cbPelanggan.Size = new System.Drawing.Size(200, 23);
-
+            cbPelanggan.Size = new Size(200, 23);
+            cbPelanggan.TabIndex = 0;
+            cbPelanggan.SelectedIndexChanged += cbPelanggan_SelectedIndexChanged;
+            // 
             // cbJadwal
-            cbJadwal.Location = new System.Drawing.Point(30, 70);
+            // 
+            cbJadwal.Location = new Point(30, 70);
             cbJadwal.Name = "cbJadwal";
-            cbJadwal.Size = new System.Drawing.Size(200, 23);
-
+            cbJadwal.Size = new Size(200, 23);
+            cbJadwal.TabIndex = 1;
+            // 
             // tJumlahTiket
-            tJumlahTiket.Location = new System.Drawing.Point(30, 110);
+            // 
+            tJumlahTiket.Location = new Point(30, 110);
             tJumlahTiket.Name = "tJumlahTiket";
-            tJumlahTiket.Size = new System.Drawing.Size(200, 23);
             tJumlahTiket.PlaceholderText = "Jumlah Tiket";
-
+            tJumlahTiket.Size = new Size(200, 23);
+            tJumlahTiket.TabIndex = 2;
+            // 
             // tTotalHarga
-            tTotalHarga.Location = new System.Drawing.Point(30, 150);
+            // 
+            tTotalHarga.Location = new Point(30, 150);
             tTotalHarga.Name = "tTotalHarga";
-            tTotalHarga.Size = new System.Drawing.Size(200, 23);
             tTotalHarga.PlaceholderText = "Total Harga";
-
+            tTotalHarga.Size = new Size(200, 23);
+            tTotalHarga.TabIndex = 3;
+            // 
             // cbStatus
-            cbStatus.Location = new System.Drawing.Point(30, 190);
-            cbStatus.Name = "cbStatus";
-            cbStatus.Size = new System.Drawing.Size(200, 23);
+            // 
             cbStatus.DropDownStyle = ComboBoxStyle.DropDownList;
             cbStatus.Items.AddRange(new object[] { "pending", "terbayar", "dibatalkan" });
-
+            cbStatus.Location = new Point(30, 190);
+            cbStatus.Name = "cbStatus";
+            cbStatus.Size = new Size(200, 23);
+            cbStatus.TabIndex = 4;
+            // 
             // dataGridView1
-            dataGridView1.Location = new System.Drawing.Point(260, 30);
-            dataGridView1.Size = new System.Drawing.Size(400, 250);
-            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            // 
+            dataGridView1.Location = new Point(260, 30);
             dataGridView1.MultiSelect = false;
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dataGridView1.Size = new Size(400, 250);
+            dataGridView1.TabIndex = 5;
             dataGridView1.CellClick += dataGridView1_CellClick;
-
+            // 
             // btnTambah
-            btnTambah.Location = new System.Drawing.Point(30, 230);
-            btnTambah.Size = new System.Drawing.Size(75, 23);
+            // 
+            btnTambah.Location = new Point(30, 230);
+            btnTambah.Name = "btnTambah";
+            btnTambah.Size = new Size(75, 23);
+            btnTambah.TabIndex = 6;
             btnTambah.Text = "Tambah";
             btnTambah.Click += btnTambah_Click;
-
+            // 
             // btnUpdate
-            btnUpdate.Location = new System.Drawing.Point(115, 230);
-            btnUpdate.Size = new System.Drawing.Size(75, 23);
+            // 
+            btnUpdate.Location = new Point(115, 230);
+            btnUpdate.Name = "btnUpdate";
+            btnUpdate.Size = new Size(75, 23);
+            btnUpdate.TabIndex = 7;
             btnUpdate.Text = "Update";
             btnUpdate.Click += btnUpdate_Click;
-
+            // 
             // btnDelete
-            btnDelete.Location = new System.Drawing.Point(200, 230);
-            btnDelete.Size = new System.Drawing.Size(75, 23);
+            // 
+            btnDelete.Location = new Point(200, 230);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(75, 23);
+            btnDelete.TabIndex = 8;
             btnDelete.Text = "Delete";
             btnDelete.Click += btnDelete_Click;
-
+            // 
             // btnRefresh
-            btnRefresh.Location = new System.Drawing.Point(30, 270);
-            btnRefresh.Size = new System.Drawing.Size(245, 23);
+            // 
+            btnRefresh.Location = new Point(30, 270);
+            btnRefresh.Name = "btnRefresh";
+            btnRefresh.Size = new Size(245, 23);
+            btnRefresh.TabIndex = 9;
             btnRefresh.Text = "Refresh";
             btnRefresh.Click += btnRefresh_Click;
-
+            // 
             // reservasi
-            this.ClientSize = new System.Drawing.Size(700, 320);
-            this.Controls.Add(cbPelanggan);
-            this.Controls.Add(cbJadwal);
-            this.Controls.Add(tJumlahTiket);
-            this.Controls.Add(tTotalHarga);
-            this.Controls.Add(cbStatus);
-            this.Controls.Add(dataGridView1);
-            this.Controls.Add(btnTambah);
-            this.Controls.Add(btnUpdate);
-            this.Controls.Add(btnDelete);
-            this.Controls.Add(btnRefresh);
-            this.Name = "reservasi";
-            this.Text = "Form Reservasi";
-            this.Load += reservasi_Load;
+            // 
+            ClientSize = new Size(700, 320);
+            Controls.Add(cbPelanggan);
+            Controls.Add(cbJadwal);
+            Controls.Add(tJumlahTiket);
+            Controls.Add(tTotalHarga);
+            Controls.Add(cbStatus);
+            Controls.Add(dataGridView1);
+            Controls.Add(btnTambah);
+            Controls.Add(btnUpdate);
+            Controls.Add(btnDelete);
+            Controls.Add(btnRefresh);
+            Name = "reservasi";
+            Text = "Form Reservasi";
+            Load += reservasi_Load;
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
     }
 }
