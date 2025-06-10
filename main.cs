@@ -33,5 +33,10 @@ namespace Travel
             mobil mobilForm = new mobil();
             mobilForm.Show();
         }
+
+        private void main_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

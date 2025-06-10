@@ -2,15 +2,29 @@
 using System.Data;
 using System.IO;
 using System.Windows.Forms;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient; // Diubah dari MySql.Data.MySqlClient
 using System.Text.RegularExpressions;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using System.Runtime.Caching;
+using System.Text;
+using System.Xml;
+
 namespace Travel
 {
     public partial class mobil : Form
     {
-        static string connectionString = "Server=localhost;Database=travel;Uid=root";
+        // Ganti dengan connection string MS SQL Server Anda
+        static string connectionString = "Data Source=AKMAL;Initial Catalog = Travel; Integrated Security = True";
+        // Atau untuk Windows Authentication:
+        // static string connectionString = "Server=your_server_name;Database=travel;Trusted_Connection=True;";
+
+        private readonly MemoryCache _cache = MemoryCache.Default;
+        private readonly CacheItemPolicy _policy = new CacheItemPolicy
+        {
+            AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5)
+        };
+        private const string CacheKey = "JadwalData";
 
         public mobil()
         {
@@ -38,91 +52,60 @@ namespace Travel
 
         private void LoadData()
         {
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            DataTable dt;
+            if (_cache.Contains(CacheKey))
             {
-                try
+                dt = _cache.Get(CacheKey) as DataTable;
+            }
+            else
+            {
+                dt = new DataTable();
+                // Menggunakan SqlConnection
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    conn.Open();
-                    string query = "SELECT * FROM jadwal";
-                    MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn);
-                    DataTable dt = new DataTable();
-                    adapter.Fill(dt);
-                    dataGridView1.DataSource = dt;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Failed to load data: " + ex.Message);
+                    try
+                    {
+                        conn.Open();
+                        string query = "SELECT * FROM jadwal";
+                        // Menggunakan SqlDataAdapter
+                        SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
+                        adapter.Fill(dt);
+                        _cache.Add(CacheKey, dt, _policy);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Failed to load data: " + ex.Message);
+                    }
                 }
             }
+            dataGridView1.DataSource = dt;
         }
 
         private bool ValidateInput()
         {
-            if (string.IsNullOrWhiteSpace(ttujuan.Text))
-            {
-                MessageBox.Show("Tujuan wajib diisi!");
-                ttujuan.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(twaktu.Text))
-            {
-                MessageBox.Show("Waktu wajib diisi!");
-                twaktu.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(tharga.Text) || !decimal.TryParse(tharga.Text, out _))
-            {
-                MessageBox.Show("Harga wajib diisi dan harus angka desimal!");
-                tharga.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(tkapasitas.Text) || !int.TryParse(tkapasitas.Text, out _))
-            {
-                MessageBox.Show("Kapasitas wajib diisi dan harus angka!");
-                tkapasitas.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(tmerk.Text))
-            {
-                MessageBox.Show("Merk mobil wajib diisi!");
-                tmerk.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(tmodel.Text))
-            {
-                MessageBox.Show("Model mobil wajib diisi!");
-                tmodel.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(tplat.Text))
-            {
-                MessageBox.Show("Plat nomor wajib diisi!");
-                tplat.Focus();
-                return false;
-            }
-            if (tstatus.SelectedIndex < 0)
-            {
-                MessageBox.Show("Status wajib dipilih!");
-                tstatus.Focus();
-                return false;
-            }
+            if (string.IsNullOrWhiteSpace(ttujuan.Text)) { MessageBox.Show("Tujuan wajib diisi!"); ttujuan.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(twaktu.Text)) { MessageBox.Show("Waktu wajib diisi!"); twaktu.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tharga.Text) || !decimal.TryParse(tharga.Text, out _)) { MessageBox.Show("Harga wajib diisi dan harus angka desimal!"); tharga.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tkapasitas.Text) || !int.TryParse(tkapasitas.Text, out _)) { MessageBox.Show("Kapasitas wajib diisi dan harus angka!"); tkapasitas.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tmerk.Text)) { MessageBox.Show("Merk mobil wajib diisi!"); tmerk.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tmodel.Text)) { MessageBox.Show("Model mobil wajib diisi!"); tmodel.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tplat.Text)) { MessageBox.Show("Plat nomor wajib diisi!"); tplat.Focus(); return false; }
+            if (tstatus.SelectedIndex < 0) { MessageBox.Show("Status wajib dipilih!"); tstatus.Focus(); return false; }
             return true;
         }
 
         private void btnTambah_Click(object sender, EventArgs e)
         {
-            if (!ValidateInput())
-                return;
-
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            if (!ValidateInput()) return;
+            // Menggunakan SqlConnection
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-                    string query = @"INSERT INTO jadwal 
-                            (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status)
-                            VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    string query = @"INSERT INTO jadwal (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status) VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
+                    // Menggunakan SqlCommand
+                    SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
                     cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
                     cmd.Parameters.AddWithValue("@waktu", TimeSpan.Parse(twaktu.Text.Trim()));
@@ -135,6 +118,7 @@ namespace Travel
                     cmd.ExecuteNonQuery();
 
                     MessageBox.Show("Data jadwal berhasil ditambah!");
+                    _cache.Remove(CacheKey);
                     ClearForm();
                     LoadData();
                 }
@@ -147,24 +131,17 @@ namespace Travel
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Pilih data yang akan diupdate!");
-                return;
-            }
-            if (!ValidateInput())
-                return;
-
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            if (dataGridView1.SelectedRows.Count == 0) { MessageBox.Show("Pilih data yang akan diupdate!"); return; }
+            if (!ValidateInput()) return;
+            // Menggunakan SqlConnection
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-                    string query = @"UPDATE jadwal SET 
-                            tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, 
-                            merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status
-                            WHERE id_jadwal=@id";
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    string query = @"UPDATE jadwal SET tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status WHERE id_jadwal=@id";
+                    // Menggunakan SqlCommand
+                    SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
                     cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
@@ -178,6 +155,7 @@ namespace Travel
                     cmd.ExecuteNonQuery();
 
                     MessageBox.Show("Data jadwal berhasil diupdate!");
+                    _cache.Remove(CacheKey);
                     ClearForm();
                     LoadData();
                 }
@@ -190,28 +168,24 @@ namespace Travel
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Pilih data yang akan dihapus!");
-                return;
-            }
-
-            DialogResult result = MessageBox.Show("Apakah Anda yakin ingin menghapus data ini?",
-                "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
+            if (dataGridView1.SelectedRows.Count == 0) { MessageBox.Show("Pilih data yang akan dihapus!"); return; }
+            DialogResult result = MessageBox.Show("Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                // Menggunakan SqlConnection
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     try
                     {
                         conn.Open();
                         string query = "DELETE FROM jadwal WHERE id_jadwal = @id";
-                        MySqlCommand cmd = new MySqlCommand(query, conn);
+                        // Menggunakan SqlCommand
+                        SqlCommand cmd = new SqlCommand(query, conn);
                         cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                         cmd.ExecuteNonQuery();
 
                         MessageBox.Show("Data jadwal berhasil dihapus!");
+                        _cache.Remove(CacheKey);
                         ClearForm();
                         LoadData();
                     }
@@ -225,6 +199,7 @@ namespace Travel
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
+            _cache.Remove(CacheKey);
             LoadData();
             ClearForm();
             MessageBox.Show("Data refreshed successfully!");
@@ -236,7 +211,6 @@ namespace Travel
             {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 ttujuan.Text = row.Cells["tujuan"].Value?.ToString();
-                // Set ttanggal.Value if possible, else fallback to today
                 if (row.Cells["tanggal"].Value != null && DateTime.TryParse(row.Cells["tanggal"].Value.ToString(), out DateTime tgl))
                     ttanggal.Value = tgl;
                 else
@@ -251,13 +225,16 @@ namespace Travel
             }
         }
 
+        // Fungsi Impor dan Preview tidak berubah secara signifikan karena logika
+        // pembacaan Excel dan interaksi dengan PreviewForm tetap sama.
+        // Perubahan hanya pada connectionString yang diteruskan ke PreviewForm.
         private void btnImport_Click(object sender, EventArgs e)
         {
             try
             {
                 using (OpenFileDialog ofd = new OpenFileDialog())
                 {
-                    ofd.Filter = "Excel Files|*.xlsx;*.xls";
+                    ofd.Filter = "Excel Files|.xlsx;.xls";
                     ofd.Title = "Pilih File Excel";
 
                     if (ofd.ShowDialog() == DialogResult.OK)
@@ -290,25 +267,16 @@ namespace Travel
                 using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     IWorkbook workbook;
-
-                    if (Path.GetExtension(filePath).ToLower() == ".xlsx")
-                    {
-                        workbook = new XSSFWorkbook(fs);
-                    }
-                    else
-                    {
-                        throw new Exception("Format file tidak didukung. Gunakan .xlsx");
-                    }
+                    if (Path.GetExtension(filePath).ToLower() == ".xlsx") { workbook = new XSSFWorkbook(fs); }
+                    else { throw new Exception("Format file tidak didukung. Gunakan .xlsx"); }
 
                     ISheet sheet = workbook.GetSheetAt(0);
-
                     for (int row = 1; row <= sheet.LastRowNum; row++)
                     {
                         IRow excelRow = sheet.GetRow(row);
                         if (excelRow != null)
                         {
                             DataRow dataRow = dt.NewRow();
-
                             dataRow["tujuan"] = excelRow.GetCell(0)?.ToString() ?? string.Empty;
                             dataRow["tanggal"] = DateTime.TryParse(excelRow.GetCell(1)?.ToString(), out var tgl) ? tgl : DateTime.Today;
                             dataRow["waktu"] = excelRow.GetCell(2)?.ToString() ?? string.Empty;
@@ -318,18 +286,20 @@ namespace Travel
                             dataRow["model_mobil"] = excelRow.GetCell(6)?.ToString() ?? string.Empty;
                             dataRow["plat_nomor"] = excelRow.GetCell(7)?.ToString() ?? string.Empty;
                             dataRow["status"] = excelRow.GetCell(8)?.ToString() ?? string.Empty;
-
                             dt.Rows.Add(dataRow);
                         }
                     }
                 }
 
-                // Tampilkan PreviewForm tanpa cache
+                // Asumsikan PreviewForm juga diubah untuk menggunakan SqlConnection
                 PreviewForm previewForm = new PreviewForm(dt, connectionString);
                 if (previewForm.ShowDialog() == DialogResult.OK)
                 {
+                    _cache.Remove(CacheKey);
                     LoadData();
                     MessageBox.Show("Data jadwal berhasil diimport!", "Import Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    AnalyzeQuery("SELECT * FROM jadwal WHERE tujuan LIKE 'Yogyakarta%'");
                 }
             }
             catch (Exception ex)
@@ -337,6 +307,55 @@ namespace Travel
                 MessageBox.Show($"Error membaca file: {ex.Message}", "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        // Diubah untuk MS SQL Server
+        private void AnalyzeQuery(string sqlQuery)
+        {
+            // Untuk SQL Server, kita menggunakan SET SHOWPLAN_XML ON
+            var explainQuery = $"SET SHOWPLAN_XML ON; {sqlQuery}; SET SHOWPLAN_XML OFF;";
+            var resultBuilder = new StringBuilder();
+
+            using (var conn = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    using (var cmd = new SqlCommand(explainQuery, conn))
+                    {
+                        // Eksekusi mengembalikan XML plan.
+                        object result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            // Mempercantik tampilan XML untuk MessageBox
+                            XmlDocument xmlDoc = new XmlDocument();
+                            xmlDoc.LoadXml(result.ToString());
+                            using (StringWriter sw = new StringWriter())
+                            {
+                                XmlTextWriter xtw = new XmlTextWriter(sw);
+                                xtw.Formatting = Formatting.Indented;
+                                xmlDoc.WriteTo(xtw);
+                                resultBuilder.Append(sw.ToString());
+                            }
+                        }
+                        else
+                        {
+                            resultBuilder.Append("Tidak ada execution plan yang dihasilkan.");
+                        }
+                    }
+                    MessageBox.Show(resultBuilder.ToString(), "Query Execution Plan");
+                }
+                catch (Exception ex)
+                {
+                    // Tangkap error jika query itu sendiri salah
+                    MessageBox.Show("Gagal menganalisis query: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void btnAnalyze_Click(object sender, EventArgs e)
+        {
+            var heavyQuery = "SELECT * FROM jadwal WHERE tujuan LIKE 'Yogyakarta%'";
+            AnalyzeQuery(heavyQuery);
+        }
     }
 }
-

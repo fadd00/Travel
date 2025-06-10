@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient; // Changed from MySql.Data.MySqlClient
 using System.Text.RegularExpressions;
+
 namespace Travel
 {
     public partial class Admin : Form
     {
-        // Connection string - Using MySQL
-        static string connectionString = "Server=localhost;Database=travel;Uid=root";
+        // Connection string - Using SQL Server
+        // You'll need to adjust "YourSqlServerName" and "YourDatabaseName"
+        static string connectionString = "Data Source=AKMAL;Initial Catalog = Travel; Integrated Security = True";
+        // Alternative for SQL Server Authentication:
+        // static string connectionString = "Server=YourSqlServerName;Database=travel;User ID=YourUsername;Password=YourPassword;";
 
         public Admin()
         {
@@ -26,18 +30,19 @@ namespace Travel
             tnohp.Clear();
             temail.Clear();
             talamat.Clear();
+            // ttujuan.Clear(); // Assuming ttujuan is also a textbox you want to clear
             tnama.Focus();
         }
 
         private void LoadData()
         {
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString)) // Using SqlConnection
             {
                 try
                 {
                     conn.Open();
                     string query = "SELECT * FROM pelanggan";
-                    MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn);
+                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn); // Using SqlDataAdapter
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
                     dataGridView1.DataSource = dt;
@@ -93,7 +98,7 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString)) // Using SqlConnection
             {
                 try
                 {
@@ -101,7 +106,7 @@ namespace Travel
 
                     string query = "INSERT INTO pelanggan (nama, telepon, email, alamat) " +
                                    "VALUES (@nama, @telepon, @email, @alamat)";
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    SqlCommand cmd = new SqlCommand(query, conn); // Using SqlCommand
                     cmd.Parameters.AddWithValue("@nama", tnama.Text.Trim());
                     cmd.Parameters.AddWithValue("@telepon", tnohp.Text.Trim());
                     cmd.Parameters.AddWithValue("@email", temail.Text.Trim());
@@ -131,7 +136,7 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connectionString)) // Using SqlConnection
             {
                 try
                 {
@@ -139,7 +144,7 @@ namespace Travel
 
                     string query = "UPDATE pelanggan SET nama = @nama, telepon = @telepon, email = @email, alamat = @alamat " +
                                    "WHERE id_pelanggan = @id_pelanggan";
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    SqlCommand cmd = new SqlCommand(query, conn); // Using SqlCommand
                     cmd.Parameters.AddWithValue("@id_pelanggan", dataGridView1.SelectedRows[0].Cells["id_pelanggan"].Value);
                     cmd.Parameters.AddWithValue("@nama", tnama.Text.Trim());
                     cmd.Parameters.AddWithValue("@telepon", tnohp.Text.Trim());
@@ -168,17 +173,17 @@ namespace Travel
             }
 
             DialogResult result = MessageBox.Show("Apakah Anda yakin ingin menghapus data ini?",
-                "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                                                  "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString)) // Using SqlConnection
                 {
                     try
                     {
                         conn.Open();
                         string query = "DELETE FROM pelanggan WHERE id_pelanggan = @id_pelanggan";
-                        MySqlCommand cmd = new MySqlCommand(query, conn);
+                        SqlCommand cmd = new SqlCommand(query, conn); // Using SqlCommand
                         cmd.Parameters.AddWithValue("@id_pelanggan", dataGridView1.SelectedRows[0].Cells["id_pelanggan"].Value);
                         cmd.ExecuteNonQuery();
 
@@ -210,13 +215,13 @@ namespace Travel
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 tnama.Text = row.Cells["nama"].Value?.ToString();
                 tnohp.Text = row.Cells["telepon"].Value?.ToString();
-                ttujuan.Text = row.Cells["tujuan"].Value?.ToString();
+                // ttujuan.Text = row.Cells["tujuan"].Value?.ToString(); // Uncomment if 'tujuan' column exists in your SQL Server 'pelanggan' table
                 temail.Text = row.Cells["email"].Value?.ToString();
                 talamat.Text = row.Cells["alamat"].Value?.ToString();
             }
         }
 
-        private void label4_Click(object sender, EventArgs e)
+        private void Admin_Load(object sender, EventArgs e)
         {
 
         }

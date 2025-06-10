@@ -1,4 +1,7 @@
-﻿namespace Travel
+﻿using System.Drawing;
+using System.Windows.Forms;
+
+namespace Travel
 {
     partial class main
     {
@@ -15,9 +18,10 @@
             // 
             // btnAdmin
             // 
-            btnAdmin.Location = new Point(50, 40);
+            btnAdmin.Location = new Point(57, 53);
+            btnAdmin.Margin = new Padding(3, 4, 3, 4);
             btnAdmin.Name = "btnAdmin";
-            btnAdmin.Size = new Size(120, 40);
+            btnAdmin.Size = new Size(137, 53);
             btnAdmin.TabIndex = 0;
             btnAdmin.Text = "pelanggan";
             btnAdmin.UseVisualStyleBackColor = true;
@@ -25,9 +29,10 @@
             // 
             // btnMobil
             // 
-            btnMobil.Location = new Point(232, 40);
+            btnMobil.Location = new Point(265, 53);
+            btnMobil.Margin = new Padding(3, 4, 3, 4);
             btnMobil.Name = "btnMobil";
-            btnMobil.Size = new Size(120, 40);
+            btnMobil.Size = new Size(137, 53);
             btnMobil.TabIndex = 1;
             btnMobil.Text = "Mobil";
             btnMobil.UseVisualStyleBackColor = true;
@@ -35,9 +40,10 @@
             // 
             // btnReservasi
             // 
-            btnReservasi.Location = new Point(409, 40);
+            btnReservasi.Location = new Point(467, 53);
+            btnReservasi.Margin = new Padding(3, 4, 3, 4);
             btnReservasi.Name = "btnReservasi";
-            btnReservasi.Size = new Size(120, 40);
+            btnReservasi.Size = new Size(137, 53);
             btnReservasi.TabIndex = 2;
             btnReservasi.Text = "Reservasi";
             btnReservasi.UseVisualStyleBackColor = true;
@@ -45,16 +51,19 @@
             // 
             // main
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(570, 121);
+            ClientSize = new Size(651, 161);
             Controls.Add(btnReservasi);
             Controls.Add(btnAdmin);
             Controls.Add(btnMobil);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "main";
             Text = "Main Menu";
+            Load += main_Load;
             ResumeLayout(false);
         }
+
         private Button btnReservasi;
     }
 }
