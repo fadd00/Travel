@@ -216,7 +216,6 @@ namespace Travel
             this.btnAnalisis.TabIndex = 16;
             this.btnAnalisis.Text = "Analisis";
             this.btnAnalisis.UseVisualStyleBackColor = true;
-            this.btnAnalisis.Click += new System.EventHandler(this.btnCollectStats_Click);
             // 
             // lblMessage
             // 
