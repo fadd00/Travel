@@ -3,36 +3,20 @@ using System.Data;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
-using System.Runtime.Caching; // Tambahkan ini jika Anda berencana menggunakan cache
-using System.Text; // Tambahkan ini jika Anda berencana menggunakan StringBuilder
-using System.Xml; // Tambahkan ini jika Anda berencana menggunakan XmlDocument
-using System.Diagnostics; // Tambahkan ini jika Anda berencana menggunakan Debug/Trace
+using System.Runtime.Caching;
+using System.Text;
+using System.Xml;
+using System.Diagnostics;
 
 namespace Travel
 {
     public partial class Admin : Form
     {
-        // Connection string - Using SQL Server
-        // You'll need to adjust "YourSqlServerName" and "YourDatabaseName"
         static string connectionString = "Data Source=AKMAL;Initial Catalog = Travel; Integrated Security = True";
-        // Alternative for SQL Server Authentication:
-        // static string connectionString = "Data Source=YourSqlServerName;Initial Catalog=YourDatabaseName;User ID=YourUser;Password=YourPassword;";
-
-        // Tambahkan inisialisasi MemoryCache jika Anda berencana menggunakannya di form Admin
-        // private readonly MemoryCache _cache = MemoryCache.Default;
-        // private readonly CacheItemPolicy _policy = new CacheItemPolicy
-        // {
-        //     AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5)
-        // };
-        // private const string CacheKey = "PelangganData";
-
 
         public Admin()
         {
             InitializeComponent();
-            // Inisialisasi lblMessage di sini jika diperlukan default text
-            // lblMessage.Text = "Form siap digunakan.";
-            // lblMessage.ForeColor = System.Drawing.Color.Black;
         }
 
         private void Admin_Load(object sender, EventArgs e) // Mengganti Form1_Load menjadi Admin_Load
@@ -319,6 +303,11 @@ namespace Travel
                 lblMessage.Text = "Data dipilih untuk diedit.";
                 lblMessage.ForeColor = System.Drawing.Color.Blue;
             }
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -45,39 +45,44 @@ namespace Travel
             this.btnRefresh = new System.Windows.Forms.Button();
             this.reportViewer1 = new Microsoft.Reporting.WinForms.ReportViewer();
             this.lblMessage = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // cbPelanggan
             // 
             this.cbPelanggan.FormattingEnabled = true;
-            this.cbPelanggan.Location = new System.Drawing.Point(113, 75);
+            this.cbPelanggan.Location = new System.Drawing.Point(204, 75);
             this.cbPelanggan.Name = "cbPelanggan";
-            this.cbPelanggan.Size = new System.Drawing.Size(245, 24);
+            this.cbPelanggan.Size = new System.Drawing.Size(154, 24);
             this.cbPelanggan.TabIndex = 0;
             this.cbPelanggan.SelectedIndexChanged += new System.EventHandler(this.cbPelanggan_SelectedIndexChanged);
             // 
             // cbJadwal
             // 
             this.cbJadwal.FormattingEnabled = true;
-            this.cbJadwal.Location = new System.Drawing.Point(113, 115);
+            this.cbJadwal.Location = new System.Drawing.Point(204, 115);
             this.cbJadwal.Name = "cbJadwal";
-            this.cbJadwal.Size = new System.Drawing.Size(245, 24);
+            this.cbJadwal.Size = new System.Drawing.Size(154, 24);
             this.cbJadwal.TabIndex = 1;
             // 
             // tJumlahTiket
             // 
-            this.tJumlahTiket.Location = new System.Drawing.Point(113, 155);
+            this.tJumlahTiket.Location = new System.Drawing.Point(204, 155);
             this.tJumlahTiket.Name = "tJumlahTiket";
-            this.tJumlahTiket.Size = new System.Drawing.Size(245, 22);
+            this.tJumlahTiket.Size = new System.Drawing.Size(154, 22);
             this.tJumlahTiket.TabIndex = 2;
             this.tJumlahTiket.Text = "Jumlah Tiket";
             // 
             // tTotalHarga
             // 
-            this.tTotalHarga.Location = new System.Drawing.Point(113, 195);
+            this.tTotalHarga.Location = new System.Drawing.Point(204, 195);
             this.tTotalHarga.Name = "tTotalHarga";
-            this.tTotalHarga.Size = new System.Drawing.Size(245, 22);
+            this.tTotalHarga.Size = new System.Drawing.Size(154, 22);
             this.tTotalHarga.TabIndex = 3;
             this.tTotalHarga.Text = "Total Harga";
             // 
@@ -89,9 +94,9 @@ namespace Travel
             "pending",
             "terbayar",
             "dibatalkan"});
-            this.cbStatus.Location = new System.Drawing.Point(113, 235);
+            this.cbStatus.Location = new System.Drawing.Point(204, 235);
             this.cbStatus.Name = "cbStatus";
-            this.cbStatus.Size = new System.Drawing.Size(245, 24);
+            this.cbStatus.Size = new System.Drawing.Size(154, 24);
             this.cbStatus.TabIndex = 4;
             // 
             // dataGridView1
@@ -163,11 +168,61 @@ namespace Travel
             this.lblMessage.TabIndex = 11;
             this.lblMessage.Text = "Message";
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(75, 78);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(113, 16);
+            this.label1.TabIndex = 12;
+            this.label1.Text = "Nama Pelanggan";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(75, 118);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(48, 16);
+            this.label2.TabIndex = 13;
+            this.label2.Text = "Tujuan";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(75, 158);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(83, 16);
+            this.label3.TabIndex = 14;
+            this.label3.Text = "Jumlah Tiket";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(75, 201);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(79, 16);
+            this.label4.TabIndex = 15;
+            this.label4.Text = "Total Harga";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(75, 238);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(44, 16);
+            this.label5.TabIndex = 16;
+            this.label5.Text = "Status";
+            // 
             // reservasi
             // 
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1008, 603);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.lblMessage);
             this.Controls.Add(this.reportViewer1);
             this.Controls.Add(this.btnRefresh);
@@ -191,5 +246,10 @@ namespace Travel
 
         private Microsoft.Reporting.WinForms.ReportViewer reportViewer1;
         private Label lblMessage;
+        private Label label1;
+        private Label label2;
+        private Label label3;
+        private Label label4;
+        private Label label5;
     }
 }

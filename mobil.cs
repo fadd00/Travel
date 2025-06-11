@@ -524,6 +524,8 @@ namespace Travel
             var queryToAnalyze = "SELECT * FROM jadwal WHERE kapasitas > 3 ORDER BY tanggal DESC";
             ShowQueryStatistics(queryToAnalyze);
         }
+
+        // Metode baru untuk memastikan indeks ada, diadaptasi dari contoh referensi
         private void EnsureIndexes()
         {
             using (var conn = new SqlConnection(connectionString))
