@@ -27,6 +27,7 @@ namespace Travel
         private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.TextBox tharga;
         private Button btnImport;
+        private System.Windows.Forms.Button btnAnalisis;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -64,6 +65,8 @@ namespace Travel
             this.btnRefresh = new System.Windows.Forms.Button();
             this.tharga = new System.Windows.Forms.TextBox();
             this.btnImport = new System.Windows.Forms.Button();
+            this.btnAnalisis = new System.Windows.Forms.Button();
+            this.lblMessage = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -71,7 +74,7 @@ namespace Travel
             // 
             this.ttujuan.Location = new System.Drawing.Point(27, 167);
             this.ttujuan.Name = "ttujuan";
-            this.ttujuan.Size = new System.Drawing.Size(200, 22);
+            this.ttujuan.Size = new System.Drawing.Size(237, 22);
             this.ttujuan.TabIndex = 0;
             this.ttujuan.Text = "tujuan";
             // 
@@ -80,14 +83,14 @@ namespace Travel
             this.ttanggal.Format = System.Windows.Forms.DateTimePickerFormat.Short;
             this.ttanggal.Location = new System.Drawing.Point(27, 53);
             this.ttanggal.Name = "ttanggal";
-            this.ttanggal.Size = new System.Drawing.Size(200, 22);
+            this.ttanggal.Size = new System.Drawing.Size(237, 22);
             this.ttanggal.TabIndex = 1;
             // 
             // twaktu
             // 
             this.twaktu.Location = new System.Drawing.Point(27, 24);
             this.twaktu.Name = "twaktu";
-            this.twaktu.Size = new System.Drawing.Size(200, 22);
+            this.twaktu.Size = new System.Drawing.Size(237, 22);
             this.twaktu.TabIndex = 2;
             this.twaktu.Text = "waktu";
             // 
@@ -95,7 +98,7 @@ namespace Travel
             // 
             this.tkapasitas.Location = new System.Drawing.Point(27, 138);
             this.tkapasitas.Name = "tkapasitas";
-            this.tkapasitas.Size = new System.Drawing.Size(200, 22);
+            this.tkapasitas.Size = new System.Drawing.Size(237, 22);
             this.tkapasitas.TabIndex = 3;
             this.tkapasitas.Text = "kapasitas";
             // 
@@ -103,7 +106,7 @@ namespace Travel
             // 
             this.tmerk.Location = new System.Drawing.Point(27, 225);
             this.tmerk.Name = "tmerk";
-            this.tmerk.Size = new System.Drawing.Size(200, 22);
+            this.tmerk.Size = new System.Drawing.Size(237, 22);
             this.tmerk.TabIndex = 4;
             this.tmerk.Text = "merek";
             // 
@@ -111,7 +114,7 @@ namespace Travel
             // 
             this.tmodel.Location = new System.Drawing.Point(27, 82);
             this.tmodel.Name = "tmodel";
-            this.tmodel.Size = new System.Drawing.Size(200, 22);
+            this.tmodel.Size = new System.Drawing.Size(237, 22);
             this.tmodel.TabIndex = 5;
             this.tmodel.Text = "model";
             // 
@@ -119,7 +122,7 @@ namespace Travel
             // 
             this.tplat.Location = new System.Drawing.Point(27, 196);
             this.tplat.Name = "tplat";
-            this.tplat.Size = new System.Drawing.Size(200, 22);
+            this.tplat.Size = new System.Drawing.Size(237, 22);
             this.tplat.TabIndex = 6;
             this.tplat.Text = "plat";
             // 
@@ -130,26 +133,26 @@ namespace Travel
             "tersedia",
             "penuh",
             "batal"});
-            this.tstatus.Location = new System.Drawing.Point(345, 138);
+            this.tstatus.Location = new System.Drawing.Point(27, 329);
             this.tstatus.Name = "tstatus";
-            this.tstatus.Size = new System.Drawing.Size(121, 24);
+            this.tstatus.Size = new System.Drawing.Size(237, 24);
             this.tstatus.TabIndex = 7;
             // 
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(472, 12);
+            this.dataGridView1.Location = new System.Drawing.Point(270, 12);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(240, 338);
+            this.dataGridView1.Size = new System.Drawing.Size(499, 338);
             this.dataGridView1.TabIndex = 8;
             this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
             // 
             // btnTambah
             // 
-            this.btnTambah.Location = new System.Drawing.Point(391, 108);
+            this.btnTambah.Location = new System.Drawing.Point(27, 294);
             this.btnTambah.Name = "btnTambah";
             this.btnTambah.Size = new System.Drawing.Size(75, 23);
             this.btnTambah.TabIndex = 9;
@@ -159,7 +162,7 @@ namespace Travel
             // 
             // btnUpdate
             // 
-            this.btnUpdate.Location = new System.Drawing.Point(391, 70);
+            this.btnUpdate.Location = new System.Drawing.Point(189, 265);
             this.btnUpdate.Name = "btnUpdate";
             this.btnUpdate.Size = new System.Drawing.Size(75, 23);
             this.btnUpdate.TabIndex = 10;
@@ -169,7 +172,7 @@ namespace Travel
             // 
             // btnDelete
             // 
-            this.btnDelete.Location = new System.Drawing.Point(391, 12);
+            this.btnDelete.Location = new System.Drawing.Point(27, 265);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(75, 23);
             this.btnDelete.TabIndex = 11;
@@ -179,7 +182,7 @@ namespace Travel
             // 
             // btnRefresh
             // 
-            this.btnRefresh.Location = new System.Drawing.Point(391, 41);
+            this.btnRefresh.Location = new System.Drawing.Point(108, 265);
             this.btnRefresh.Name = "btnRefresh";
             this.btnRefresh.Size = new System.Drawing.Size(75, 23);
             this.btnRefresh.TabIndex = 12;
@@ -191,23 +194,43 @@ namespace Travel
             // 
             this.tharga.Location = new System.Drawing.Point(27, 109);
             this.tharga.Name = "tharga";
-            this.tharga.Size = new System.Drawing.Size(200, 22);
+            this.tharga.Size = new System.Drawing.Size(237, 22);
             this.tharga.TabIndex = 13;
             this.tharga.Text = "harga";
             // 
             // btnImport
             // 
-            this.btnImport.Location = new System.Drawing.Point(375, 276);
+            this.btnImport.Location = new System.Drawing.Point(189, 294);
             this.btnImport.Name = "btnImport";
-            this.btnImport.Size = new System.Drawing.Size(80, 30);
+            this.btnImport.Size = new System.Drawing.Size(75, 30);
             this.btnImport.TabIndex = 14;
             this.btnImport.Text = "Import Excel";
             this.btnImport.UseVisualStyleBackColor = true;
             this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
             // 
+            // btnAnalisis
+            // 
+            this.btnAnalisis.Location = new System.Drawing.Point(108, 294);
+            this.btnAnalisis.Name = "btnAnalisis";
+            this.btnAnalisis.Size = new System.Drawing.Size(75, 29);
+            this.btnAnalisis.TabIndex = 16;
+            this.btnAnalisis.Text = "Analisis";
+            this.btnAnalisis.UseVisualStyleBackColor = true;
+            this.btnAnalisis.Click += new System.EventHandler(this.btnCollectStats_Click);
+            // 
+            // lblMessage
+            // 
+            this.lblMessage.AutoSize = true;
+            this.lblMessage.Location = new System.Drawing.Point(31, 366);
+            this.lblMessage.Name = "lblMessage";
+            this.lblMessage.Size = new System.Drawing.Size(64, 16);
+            this.lblMessage.TabIndex = 17;
+            this.lblMessage.Text = "Message";
+            // 
             // mobil
             // 
-            this.ClientSize = new System.Drawing.Size(724, 376);
+            this.ClientSize = new System.Drawing.Size(781, 395);
+            this.Controls.Add(this.lblMessage);
             this.Controls.Add(this.ttujuan);
             this.Controls.Add(this.ttanggal);
             this.Controls.Add(this.twaktu);
@@ -223,6 +246,7 @@ namespace Travel
             this.Controls.Add(this.btnDelete);
             this.Controls.Add(this.btnRefresh);
             this.Controls.Add(this.btnImport);
+            this.Controls.Add(this.btnAnalisis);
             this.Name = "mobil";
             this.Text = "Form Jadwal Mobil";
             this.Load += new System.EventHandler(this.mobil_Load);
@@ -233,5 +257,7 @@ namespace Travel
         }
 
         #endregion
+
+        private Label lblMessage;
     }
 }

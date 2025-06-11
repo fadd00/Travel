@@ -44,6 +44,7 @@ namespace Travel
             this.btnDelete = new System.Windows.Forms.Button();
             this.btnRefresh = new System.Windows.Forms.Button();
             this.reportViewer1 = new Microsoft.Reporting.WinForms.ReportViewer();
+            this.lblMessage = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -153,11 +154,21 @@ namespace Travel
             this.reportViewer1.TabIndex = 10;
             this.reportViewer1.Load += new System.EventHandler(this.reportViewer1_Load);
             // 
+            // lblMessage
+            // 
+            this.lblMessage.AutoSize = true;
+            this.lblMessage.Location = new System.Drawing.Point(110, 555);
+            this.lblMessage.Name = "lblMessage";
+            this.lblMessage.Size = new System.Drawing.Size(64, 16);
+            this.lblMessage.TabIndex = 11;
+            this.lblMessage.Text = "Message";
+            // 
             // reservasi
             // 
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(1008, 580);
+            this.ClientSize = new System.Drawing.Size(1008, 603);
+            this.Controls.Add(this.lblMessage);
             this.Controls.Add(this.reportViewer1);
             this.Controls.Add(this.btnRefresh);
             this.Controls.Add(this.btnDelete);
@@ -179,5 +190,6 @@ namespace Travel
         }
 
         private Microsoft.Reporting.WinForms.ReportViewer reportViewer1;
+        private Label lblMessage;
     }
 }

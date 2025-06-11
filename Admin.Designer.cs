@@ -30,6 +30,7 @@ namespace Travel
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
+            this.lblMessage = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -147,9 +148,19 @@ namespace Travel
             this.label5.TabIndex = 14;
             this.label5.Text = "NO HP";
             // 
+            // lblMessage
+            // 
+            this.lblMessage.AutoSize = true;
+            this.lblMessage.Location = new System.Drawing.Point(15, 347);
+            this.lblMessage.Name = "lblMessage";
+            this.lblMessage.Size = new System.Drawing.Size(64, 16);
+            this.lblMessage.TabIndex = 15;
+            this.lblMessage.Text = "Message";
+            // 
             // Admin
             // 
-            this.ClientSize = new System.Drawing.Size(529, 351);
+            this.ClientSize = new System.Drawing.Size(529, 376);
+            this.Controls.Add(this.lblMessage);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -176,5 +187,6 @@ namespace Travel
         private Label label2;
         private Label label3;
         private Label label5;
+        private Label lblMessage;
     }
 }
