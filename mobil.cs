@@ -1,27 +1,21 @@
-﻿using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data;
-using System.Data.SqlClient;
-using System.Diagnostics;
 using System.IO;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+using System.Text.RegularExpressions;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 using System.Runtime.Caching;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using System.Xml;
+using System.Diagnostics;
 
 namespace Travel
 {
     public partial class mobil : Form
     {
-        // Changed back to MS SQL Server connection string
         static string connectionString = "Data Source=AKMAL;Initial Catalog=Travel;Integrated Security=True;";
-        // Or for Windows Authentication:
-        // static string connectionString = "Server=your_server_name;Database=travel;Trusted_Connection=True;";
-
         private readonly MemoryCache _cache = MemoryCache.Default;
         private readonly CacheItemPolicy _policy = new CacheItemPolicy
         {
@@ -32,7 +26,7 @@ namespace Travel
         public mobil()
         {
             InitializeComponent();
-            // Inisialisasi item tstatus jika belum dilakukan di designer
+            // Initialize tstatus items if not done in designer
             if (tstatus.Items.Count == 0)
             {
                 tstatus.Items.AddRange(new string[] { "tersedia", "penuh", "batal" });
@@ -41,8 +35,10 @@ namespace Travel
 
         private void mobil_Load(object sender, EventArgs e)
         {
+            // Call method to ensure indexes exist when the form loads
+            EnsureIndexes();
             LoadData();
-            ClearForm(); // Panggil ClearForm saat form dimuat
+            ClearForm();
         }
 
         private void ClearForm()
@@ -55,7 +51,7 @@ namespace Travel
             tmerk.Text = "";
             tmodel.Text = "";
             tplat.Text = "";
-            // Pastikan tstatus memiliki item sebelum mencoba mengatur SelectedIndex
+            // Ensure tstatus has items before attempting to set SelectedIndex
             if (tstatus.Items.Count > 0)
             {
                 tstatus.SelectedIndex = 0;
@@ -126,13 +122,13 @@ namespace Travel
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                conn.Open(); // Buka koneksi sebelum memulai transaksi
-                SqlTransaction transaction = conn.BeginTransaction(); // Mulai transaksi
+                conn.Open();
+                SqlTransaction transaction = conn.BeginTransaction();
 
                 try
                 {
                     string query = @"INSERT INTO jadwal (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status) VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
-                    SqlCommand cmd = new SqlCommand(query, conn, transaction); // Kaitkan command dengan transaksi
+                    SqlCommand cmd = new SqlCommand(query, conn, transaction);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
                     cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
                     cmd.Parameters.AddWithValue("@waktu", TimeSpan.Parse(twaktu.Text.Trim()));
@@ -144,24 +140,24 @@ namespace Travel
                     cmd.Parameters.AddWithValue("@status", tstatus.SelectedItem.ToString());
                     cmd.ExecuteNonQuery();
 
-                    transaction.Commit(); // Commit transaksi jika semua berhasil
+                    transaction.Commit();
                     MessageBox.Show("Data jadwal berhasil ditambah!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     lblMessage.Text = "Jadwal baru berhasil ditambahkan!";
                     lblMessage.ForeColor = System.Drawing.Color.Green;
-                    _cache.Remove(CacheKey); // Hapus cache agar data baru termuat
+                    _cache.Remove(CacheKey);
                     ClearForm();
                     LoadData();
                 }
                 catch (SqlException ex)
                 {
-                    transaction.Rollback(); // Rollback pada error SQL
+                    transaction.Rollback();
                     MessageBox.Show("Terjadi error database saat menambah data: " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     lblMessage.Text = "Gagal menambah data karena error database (rollback).";
                     lblMessage.ForeColor = System.Drawing.Color.Red;
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback(); // Rollback pada error lainnya
+                    transaction.Rollback();
                     MessageBox.Show("Terjadi error tak terduga saat menambah data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     lblMessage.Text = "Gagal menambah data karena error tak terduga (rollback).";
                     lblMessage.ForeColor = System.Drawing.Color.Red;
@@ -170,7 +166,7 @@ namespace Travel
                 {
                     if (conn.State == ConnectionState.Open)
                     {
-                        conn.Close(); // Pastikan koneksi ditutup
+                        conn.Close();
                     }
                 }
             }
@@ -183,13 +179,13 @@ namespace Travel
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                conn.Open(); // Buka koneksi sebelum memulai transaksi
-                SqlTransaction transaction = conn.BeginTransaction(); // Mulai transaksi
+                conn.Open();
+                SqlTransaction transaction = conn.BeginTransaction();
 
                 try
                 {
                     string query = @"UPDATE jadwal SET tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status WHERE id_jadwal=@id";
-                    SqlCommand cmd = new SqlCommand(query, conn, transaction); // Kaitkan command dengan transaksi
+                    SqlCommand cmd = new SqlCommand(query, conn, transaction);
                     cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
                     cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
@@ -202,24 +198,24 @@ namespace Travel
                     cmd.Parameters.AddWithValue("@status", tstatus.SelectedItem.ToString());
                     cmd.ExecuteNonQuery();
 
-                    transaction.Commit(); // Commit transaksi jika semua berhasil
+                    transaction.Commit();
                     MessageBox.Show("Data jadwal berhasil diupdate!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     lblMessage.Text = "Data jadwal berhasil diperbarui!";
                     lblMessage.ForeColor = System.Drawing.Color.Green;
-                    _cache.Remove(CacheKey); // Hapus cache agar data baru termuat
+                    _cache.Remove(CacheKey);
                     ClearForm();
                     LoadData();
                 }
                 catch (SqlException ex)
                 {
-                    transaction.Rollback(); // Rollback pada error SQL
+                    transaction.Rollback();
                     MessageBox.Show("Terjadi error database saat memperbarui data: " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     lblMessage.Text = "Gagal memperbarui data karena error database (rollback).";
                     lblMessage.ForeColor = System.Drawing.Color.Red;
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback(); // Rollback pada error lainnya
+                    transaction.Rollback();
                     MessageBox.Show("Terjadi error tak terduga saat memperbarui data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     lblMessage.Text = "Gagal memperbarui data karena error tak terduga (rollback).";
                     lblMessage.ForeColor = System.Drawing.Color.Red;
@@ -228,7 +224,7 @@ namespace Travel
                 {
                     if (conn.State == ConnectionState.Open)
                     {
-                        conn.Close(); // Pastikan koneksi ditutup
+                        conn.Close();
                     }
                 }
             }
@@ -242,34 +238,34 @@ namespace Travel
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    conn.Open(); // Buka koneksi sebelum memulai transaksi
-                    SqlTransaction transaction = conn.BeginTransaction(); // Mulai transaksi
+                    conn.Open();
+                    SqlTransaction transaction = conn.BeginTransaction();
 
                     try
                     {
                         string query = "DELETE FROM jadwal WHERE id_jadwal = @id";
-                        SqlCommand cmd = new SqlCommand(query, conn, transaction); // Kaitkan command dengan transaksi
+                        SqlCommand cmd = new SqlCommand(query, conn, transaction);
                         cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                         cmd.ExecuteNonQuery();
 
-                        transaction.Commit(); // Commit transaksi jika semua berhasil
+                        transaction.Commit();
                         MessageBox.Show("Data jadwal berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         lblMessage.Text = "Data jadwal berhasil dihapus!";
                         lblMessage.ForeColor = System.Drawing.Color.Green;
-                        _cache.Remove(CacheKey); // Hapus cache agar data baru termuat
+                        _cache.Remove(CacheKey);
                         ClearForm();
                         LoadData();
                     }
                     catch (SqlException ex)
                     {
-                        transaction.Rollback(); // Rollback pada error SQL
+                        transaction.Rollback();
                         MessageBox.Show("Terjadi error database saat menghapus data: " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         lblMessage.Text = "Gagal menghapus data karena error database (rollback).";
                         lblMessage.ForeColor = System.Drawing.Color.Red;
                     }
                     catch (Exception ex)
                     {
-                        transaction.Rollback(); // Rollback pada error lainnya
+                        transaction.Rollback();
                         MessageBox.Show("Terjadi error tak terduga saat menghapus data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         lblMessage.Text = "Gagal menghapus data karena error tak terduga (rollback).";
                         lblMessage.ForeColor = System.Drawing.Color.Red;
@@ -278,7 +274,7 @@ namespace Travel
                     {
                         if (conn.State == ConnectionState.Open)
                         {
-                            conn.Close(); // Pastikan koneksi ditutup
+                            conn.Close();
                         }
                     }
                 }
@@ -287,7 +283,7 @@ namespace Travel
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
-            _cache.Remove(CacheKey); // Hapus cache untuk memaksa pemuatan ulang dari DB
+            _cache.Remove(CacheKey);
             LoadData();
             ClearForm();
             MessageBox.Show("Data berhasil di-refresh!", "Refresh", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -309,9 +305,9 @@ namespace Travel
                 object waktuValue = row.Cells["waktu"].Value;
                 if (waktuValue is TimeSpan ts)
                 {
-                    twaktu.Text = ts.ToString(@"hh\:mm"); // Format sebagai HH:mm untuk tampilan
+                    twaktu.Text = ts.ToString(@"hh\:mm");
                 }
-                else if (waktuValue != null && TimeSpan.TryParse(waktuValue.ToString(), out TimeSpan parsedTs)) // Coba parse jika berupa string
+                else if (waktuValue != null && TimeSpan.TryParse(waktuValue.ToString(), out TimeSpan parsedTs))
                 {
                     twaktu.Text = parsedTs.ToString(@"hh\:mm");
                 }
@@ -326,7 +322,6 @@ namespace Travel
                 tmodel.Text = row.Cells["model_mobil"].Value?.ToString();
                 tplat.Text = row.Cells["plat_nomor"].Value?.ToString();
 
-                // Pastikan tstatus memiliki item yang sesuai
                 string statusValue = row.Cells["status"].Value?.ToString();
                 if (statusValue != null)
                 {
@@ -338,12 +333,12 @@ namespace Travel
                     else
                     {
                         MessageBox.Show($"Status '{statusValue}' dari database tidak ditemukan di daftar dropdown status. Silakan periksa data atau item dropdown Anda.", "Ketidakcocokan Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        tstatus.SelectedIndex = -1; // Kosongkan pilihan jika tidak cocok
+                        tstatus.SelectedIndex = -1;
                     }
                 }
                 else
                 {
-                    tstatus.SelectedIndex = -1; // Kosongkan pilihan jika status null
+                    tstatus.SelectedIndex = -1;
                 }
                 lblMessage.Text = "Data dipilih untuk diedit.";
                 lblMessage.ForeColor = System.Drawing.Color.Blue;
@@ -356,7 +351,6 @@ namespace Travel
             {
                 using (OpenFileDialog ofd = new OpenFileDialog())
                 {
-                    ofd.Filter = "Excel Files|.xlsx;.xls";
                     ofd.Title = "Pilih File Excel";
 
                     if (ofd.ShowDialog() == DialogResult.OK)
@@ -403,7 +397,7 @@ namespace Travel
                         {
                             DataRow dataRow = dt.NewRow();
                             dataRow["tujuan"] = excelRow.GetCell(0)?.ToString() ?? string.Empty;
-                            // NPOI membaca tanggal sebagai numeric, perlu dikonversi dari numeric date ke DateTime
+                            // NPOI reads dates as numeric, need to convert from numeric date to DateTime
                             if (excelRow.GetCell(1) != null && excelRow.GetCell(1).CellType == CellType.Numeric && DateUtil.IsCellDateFormatted(excelRow.GetCell(1)))
                             {
                                 dataRow["tanggal"] = excelRow.GetCell(1).DateCellValue;
@@ -450,75 +444,6 @@ namespace Travel
                 lblMessage.Text = $"Gagal membaca file untuk preview: {ex.Message}";
                 lblMessage.ForeColor = System.Drawing.Color.Red;
             }
-        }
-
-        private void AnalyzeQuery(string sqlQuery)
-        {
-            var explainQuery = $"SET SHOWPLAN_XML ON; {sqlQuery}; SET SHOWPLAN_XML OFF;";
-            var resultBuilder = new StringBuilder();
-
-            using (var conn = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    using (var cmd = new SqlCommand(explainQuery, conn))
-                    {
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                if (reader.FieldCount > 0 && !reader.IsDBNull(0))
-                                {
-                                    string planXml = reader.GetString(0);
-                                    XmlDocument xmlDoc = new XmlDocument();
-                                    xmlDoc.LoadXml(planXml);
-                                    using (StringWriter sw = new StringWriter())
-                                    {
-                                        XmlTextWriter xtw = new XmlTextWriter(sw);
-                                        xtw.Formatting = Formatting.Indented;
-                                        xmlDoc.WriteTo(xtw);
-                                        resultBuilder.Append(sw.ToString());
-                                    }
-                                    lblMessage.Text = "Execution plan XML berhasil diambil.";
-                                    lblMessage.ForeColor = System.Drawing.Color.Green;
-                                }
-                                else
-                                {
-                                    resultBuilder.Append("Tidak ada execution plan XML yang dihasilkan.");
-                                    lblMessage.Text = "Tidak ada execution plan XML yang dihasilkan.";
-                                    lblMessage.ForeColor = System.Drawing.Color.Orange;
-                                }
-                            }
-                            else
-                            {
-                                resultBuilder.Append("Tidak ada execution plan yang dihasilkan.");
-                                lblMessage.Text = "Tidak ada execution plan yang dihasilkan.";
-                                lblMessage.ForeColor = System.Drawing.Color.Orange;
-                            }
-                        }
-                    }
-                    MessageBox.Show(resultBuilder.ToString(), "Query Execution Plan (XML)");
-                }
-                catch (SqlException ex)
-                {
-                    MessageBox.Show("Terjadi error database saat menganalisis query (SHOWPLAN_XML): " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal menganalisis query (SHOWPLAN_XML) karena error database.";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Terjadi error tak terduga saat menganalisis query (SHOWPLAN_XML): " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal menganalisis query (SHOWPLAN_XML) karena error tak terduga.";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                }
-            }
-        }
-
-        private void btnAnalyze_Click(object sender, EventArgs e)
-        {
-            var heavyQuery = "SELECT * FROM jadwal WHERE tujuan LIKE 'Yogyakarta%'";
-            AnalyzeQuery(heavyQuery);
         }
 
         private void ShowQueryStatistics(string sqlQuery)
@@ -594,10 +519,60 @@ namespace Travel
             }
         }
 
-        private void btnCollectStats_Click(object sender, EventArgs e)
+        private void btnAnalisis_Click(object sender, EventArgs e)
         {
             var queryToAnalyze = "SELECT * FROM jadwal WHERE kapasitas > 3 ORDER BY tanggal DESC";
             ShowQueryStatistics(queryToAnalyze);
+        }
+
+        // Metode baru untuk memastikan indeks ada, diadaptasi dari contoh referensi
+        private void EnsureIndexes()
+        {
+            using (var conn = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    var indexScript = @"
+                        IF OBJECT_ID('dbo.jadwal', 'U') IS NOT NULL
+                        BEGIN
+                            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='idx_jadwal_tujuan' AND object_id = OBJECT_ID('dbo.jadwal'))
+                                CREATE NONCLUSTERED INDEX idx_jadwal_tujuan ON dbo.jadwal (tujuan);
+
+                            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='idx_jadwal_tanggal' AND object_id = OBJECT_ID('dbo.jadwal'))
+                                CREATE NONCLUSTERED INDEX idx_jadwal_tanggal ON dbo.jadwal (tanggal);
+
+                            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='idx_jadwal_tujuan_tanggal' AND object_id = OBJECT_ID('dbo.jadwal'))
+                                CREATE NONCLUSTERED INDEX idx_jadwal_tujuan_tanggal ON dbo.jadwal (tujuan, tanggal);
+                        END";
+                    using (var cmd = new SqlCommand(indexScript, conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    lblMessage.Text = "Indeks untuk tabel jadwal berhasil diverifikasi/dibuat.";
+                    lblMessage.ForeColor = System.Drawing.Color.Green;
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Terjadi error database saat memastikan indeks jadwal: " + ex.Message, "Error Indeks", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    lblMessage.Text = "Gagal memastikan indeks jadwal karena error database.";
+                    lblMessage.ForeColor = System.Drawing.Color.Red;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Terjadi error tak terduga saat memastikan indeks jadwal: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    lblMessage.Text = "Gagal memastikan indeks jadwal karena error tak terduga.";
+                    lblMessage.ForeColor = System.Drawing.Color.Red;
+                }
+                finally
+                {
+                    if (conn.State == ConnectionState.Open)
+                    {
+                        conn.Close();
+                    }
+                }
+            }
         }
     }
 }

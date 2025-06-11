@@ -54,16 +54,7 @@ namespace Travel
 
         private void LoadData()
         {
-            // Jika ingin menggunakan cache di sini, bisa diimplementasikan seperti di form mobil
-            // DataTable dt;
-            // if (_cache.Contains(CacheKey))
-            // {
-            //     dt = _cache.Get(CacheKey) as DataTable;
-            //     lblMessage.Text = "Data dimuat dari cache.";
-            //     lblMessage.ForeColor = System.Drawing.Color.Blue;
-            // }
-            // else
-            // {
+
             DataTable dt = new DataTable();
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
