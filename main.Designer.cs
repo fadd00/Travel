@@ -11,57 +11,61 @@ namespace Travel
 
         private void InitializeComponent()
         {
-            btnAdmin = new Button();
-            btnMobil = new Button();
-            btnReservasi = new Button();
-            SuspendLayout();
+            this.btnAdmin = new System.Windows.Forms.Button();
+            this.btnMobil = new System.Windows.Forms.Button();
+            this.btnReservasi = new System.Windows.Forms.Button();
+            this.SuspendLayout();
             // 
             // btnAdmin
             // 
-            btnAdmin.Location = new Point(57, 53);
-            btnAdmin.Margin = new Padding(3, 4, 3, 4);
-            btnAdmin.Name = "btnAdmin";
-            btnAdmin.Size = new Size(137, 53);
-            btnAdmin.TabIndex = 0;
-            btnAdmin.Text = "pelanggan";
-            btnAdmin.UseVisualStyleBackColor = true;
-            btnAdmin.Click += btnAdmin_Click;
+            this.btnAdmin.BackColor = System.Drawing.Color.PapayaWhip;
+            this.btnAdmin.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAdmin.Location = new System.Drawing.Point(57, 62);
+            this.btnAdmin.Name = "btnAdmin";
+            this.btnAdmin.Size = new System.Drawing.Size(137, 42);
+            this.btnAdmin.TabIndex = 0;
+            this.btnAdmin.Text = "pelanggan";
+            this.btnAdmin.UseVisualStyleBackColor = false;
+            this.btnAdmin.Click += new System.EventHandler(this.btnAdmin_Click);
             // 
             // btnMobil
             // 
-            btnMobil.Location = new Point(265, 53);
-            btnMobil.Margin = new Padding(3, 4, 3, 4);
-            btnMobil.Name = "btnMobil";
-            btnMobil.Size = new Size(137, 53);
-            btnMobil.TabIndex = 1;
-            btnMobil.Text = "Mobil";
-            btnMobil.UseVisualStyleBackColor = true;
-            btnMobil.Click += btnMobil_Click;
+            this.btnMobil.BackColor = System.Drawing.Color.PapayaWhip;
+            this.btnMobil.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnMobil.Location = new System.Drawing.Point(265, 62);
+            this.btnMobil.Name = "btnMobil";
+            this.btnMobil.Size = new System.Drawing.Size(137, 42);
+            this.btnMobil.TabIndex = 1;
+            this.btnMobil.Text = "Mobil";
+            this.btnMobil.UseVisualStyleBackColor = false;
+            this.btnMobil.Click += new System.EventHandler(this.btnMobil_Click);
             // 
             // btnReservasi
             // 
-            btnReservasi.Location = new Point(467, 53);
-            btnReservasi.Margin = new Padding(3, 4, 3, 4);
-            btnReservasi.Name = "btnReservasi";
-            btnReservasi.Size = new Size(137, 53);
-            btnReservasi.TabIndex = 2;
-            btnReservasi.Text = "Reservasi";
-            btnReservasi.UseVisualStyleBackColor = true;
-            btnReservasi.Click += btnReservasi_Click;
+            this.btnReservasi.BackColor = System.Drawing.Color.PapayaWhip;
+            this.btnReservasi.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnReservasi.Location = new System.Drawing.Point(467, 62);
+            this.btnReservasi.Name = "btnReservasi";
+            this.btnReservasi.Size = new System.Drawing.Size(137, 42);
+            this.btnReservasi.TabIndex = 2;
+            this.btnReservasi.Text = "Reservasi";
+            this.btnReservasi.UseVisualStyleBackColor = false;
+            this.btnReservasi.Click += new System.EventHandler(this.btnReservasi_Click);
             // 
             // main
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(651, 161);
-            Controls.Add(btnReservasi);
-            Controls.Add(btnAdmin);
-            Controls.Add(btnMobil);
-            Margin = new Padding(3, 4, 3, 4);
-            Name = "main";
-            Text = "Main Menu";
-            Load += main_Load;
-            ResumeLayout(false);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackgroundImage = global::Travel.Properties.Resources.Kumpulan_Background_Pastel_yang_Indah_dan_Elegan;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.ClientSize = new System.Drawing.Size(682, 177);
+            this.Controls.Add(this.btnReservasi);
+            this.Controls.Add(this.btnAdmin);
+            this.Controls.Add(this.btnMobil);
+            this.Name = "main";
+            this.Text = "Main Menu";
+            this.ResumeLayout(false);
+
         }
 
         private Button btnReservasi;

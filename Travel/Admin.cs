@@ -1,26 +1,18 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
-using System.Data.SqlClient; // Changed from MySql.Data.MySqlClient
+using MySql.Data.MySqlClient;
 using System.Text.RegularExpressions;
-using System.IO;
-
 namespace Travel
 {
     public partial class Admin : Form
     {
-        Koneksi kn = new Koneksi();
-        string strKonek; 
-
-        // You'll need to adjust "YourSqlServerName" and "YourDatabaseName"
-        static string connectionString = "Data Source=AKMAL;Initial Catalog = Travel; Integrated Security = True";
-        // Alternative for SQL Server Authentication:
-        // static string connectionString = "Server=YourSqlServerName;Database=travel;User ID=YourUsername;Password=YourPassword;";
+        // Connection string - Using MySQL
+        static string connectionString = "Server=localhost;Database=travel;Uid=root";
 
         public Admin()
         {
             InitializeComponent();
-            strKonek = kn.connectionString(); // Get connection string from Koneksi class
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -34,20 +26,18 @@ namespace Travel
             tnohp.Clear();
             temail.Clear();
             talamat.Clear();
-            
             tnama.Focus();
         }
 
         private void LoadData()
         {
-            
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
-                    SqlConnection conn = new SqlConnection(strKonek); // Initialize connection with the connection string
                     conn.Open();
                     string query = "SELECT * FROM pelanggan";
-                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn); // Using SqlDataAdapter
+                    MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
                     dataGridView1.DataSource = dt;
@@ -103,52 +93,31 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
-                conn.Open();
-                SqlTransaction transaction = conn.BeginTransaction();
                 try
                 {
-                    // Cek duplikat data
-                    string checkQuery = @"SELECT COUNT(*) FROM pelanggan 
-                                  WHERE nama = @nama AND telepon = @telepon AND email = @email AND alamat = @alamat";
-                    SqlCommand checkCmd = new SqlCommand(checkQuery, conn, transaction);
-                    checkCmd.Parameters.AddWithValue("@nama", tnama.Text.Trim());
-                    checkCmd.Parameters.AddWithValue("@telepon", tnohp.Text.Trim());
-                    checkCmd.Parameters.AddWithValue("@email", temail.Text.Trim());
-                    checkCmd.Parameters.AddWithValue("@alamat", talamat.Text.Trim());
+                    conn.Open();
 
-                    int exists = (int)checkCmd.ExecuteScalar();
-                    if (exists > 0)
-                    {
-                        MessageBox.Show("Data pelanggan sudah ada, tidak boleh duplikat!");
-                        transaction.Rollback();
-                        return;
-                    }
-
-                    // Jika tidak duplikat, lakukan insert
                     string query = "INSERT INTO pelanggan (nama, telepon, email, alamat) " +
                                    "VALUES (@nama, @telepon, @email, @alamat)";
-                    SqlCommand cmd = new SqlCommand(query, conn, transaction);
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@nama", tnama.Text.Trim());
                     cmd.Parameters.AddWithValue("@telepon", tnohp.Text.Trim());
                     cmd.Parameters.AddWithValue("@email", temail.Text.Trim());
                     cmd.Parameters.AddWithValue("@alamat", talamat.Text.Trim());
                     cmd.ExecuteNonQuery();
 
-                    transaction.Commit();
                     MessageBox.Show("Customer data saved successfully!");
                     ClearForm();
                     LoadData();
                 }
                 catch (Exception ex)
                 {
-                    try { transaction.Rollback(); } catch { }
                     MessageBox.Show("Failed to save data: " + ex.Message);
                 }
             }
         }
-
 
         // Update existing customer data
         private void btnUpdate_Click(object sender, EventArgs e)
@@ -162,15 +131,15 @@ namespace Travel
             if (!ValidateInput())
                 return;
 
-            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
-                conn.Open();
-                SqlTransaction transaction = conn.BeginTransaction();
                 try
                 {
+                    conn.Open();
+
                     string query = "UPDATE pelanggan SET nama = @nama, telepon = @telepon, email = @email, alamat = @alamat " +
                                    "WHERE id_pelanggan = @id_pelanggan";
-                    SqlCommand cmd = new SqlCommand(query, conn, transaction);
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@id_pelanggan", dataGridView1.SelectedRows[0].Cells["id_pelanggan"].Value);
                     cmd.Parameters.AddWithValue("@nama", tnama.Text.Trim());
                     cmd.Parameters.AddWithValue("@telepon", tnohp.Text.Trim());
@@ -178,19 +147,16 @@ namespace Travel
                     cmd.Parameters.AddWithValue("@alamat", talamat.Text.Trim());
                     cmd.ExecuteNonQuery();
 
-                    transaction.Commit();
                     MessageBox.Show("Customer data updated successfully!");
                     ClearForm();
                     LoadData();
                 }
                 catch (Exception ex)
                 {
-                    try { transaction.Rollback(); } catch { }
                     MessageBox.Show("Failed to update data: " + ex.Message);
                 }
             }
         }
-
 
         // Delete customer data
         private void btnDelete_Click(object sender, EventArgs e)
@@ -202,17 +168,17 @@ namespace Travel
             }
 
             DialogResult result = MessageBox.Show("Apakah Anda yakin ingin menghapus data ini?",
-                                                  "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
-                using (SqlConnection conn = new SqlConnection(kn.connectionString())) // Using SqlConnection
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
                     try
                     {
                         conn.Open();
                         string query = "DELETE FROM pelanggan WHERE id_pelanggan = @id_pelanggan";
-                        SqlCommand cmd = new SqlCommand(query, conn); // Using SqlCommand
+                        MySqlCommand cmd = new MySqlCommand(query, conn);
                         cmd.Parameters.AddWithValue("@id_pelanggan", dataGridView1.SelectedRows[0].Cells["id_pelanggan"].Value);
                         cmd.ExecuteNonQuery();
 
@@ -244,12 +210,13 @@ namespace Travel
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 tnama.Text = row.Cells["nama"].Value?.ToString();
                 tnohp.Text = row.Cells["telepon"].Value?.ToString();
+                ttujuan.Text = row.Cells["tujuan"].Value?.ToString();
                 temail.Text = row.Cells["email"].Value?.ToString();
                 talamat.Text = row.Cells["alamat"].Value?.ToString();
             }
         }
 
-        private void Admin_Load(object sender, EventArgs e)
+        private void label4_Click(object sender, EventArgs e)
         {
 
         }

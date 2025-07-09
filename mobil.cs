@@ -2,20 +2,24 @@
 using System.Data;
 using System.IO;
 using System.Windows.Forms;
-using System.Data.SqlClient;
+using System.Data.SqlClient; // Diubah dari MySql.Data.MySqlClient
 using System.Text.RegularExpressions;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System.Runtime.Caching;
 using System.Text;
 using System.Xml;
-using System.Diagnostics;
 
 namespace Travel
 {
     public partial class mobil : Form
     {
-        static string connectionString = "Data Source=AKMAL;Initial Catalog=Travel;Integrated Security=True;";
+        Koneksi kn = new Koneksi();
+        // Ganti dengan connection string MS SQL Server Anda
+        static string connectionString = "Data Source=AKMAL;Initial Catalog = Travel; Integrated Security = True";
+        // Atau untuk Windows Authentication:
+        // static string connectionString = "Server=your_server_name;Database=travel;Trusted_Connection=True;";
+
         private readonly MemoryCache _cache = MemoryCache.Default;
         private readonly CacheItemPolicy _policy = new CacheItemPolicy
         {
@@ -26,39 +30,25 @@ namespace Travel
         public mobil()
         {
             InitializeComponent();
-            // Initialize tstatus items if not done in designer
-            if (tstatus.Items.Count == 0)
-            {
-                tstatus.Items.AddRange(new string[] { "tersedia", "penuh", "batal" });
-            }
         }
 
         private void mobil_Load(object sender, EventArgs e)
         {
-            // Call method to ensure indexes exist when the form loads
-            EnsureIndexes();
             LoadData();
-            ClearForm();
         }
 
         private void ClearForm()
         {
             ttujuan.Clear();
             ttanggal.Value = DateTime.Today;
-            twaktu.Text = ""; // Assuming twaktu is a MaskedTextBox or similar for TIME format HH:mm
+            twaktu.Text = "";
             tharga.Text = "";
             tkapasitas.Text = "";
             tmerk.Text = "";
             tmodel.Text = "";
             tplat.Text = "";
-            // Ensure tstatus has items before attempting to set SelectedIndex
-            if (tstatus.Items.Count > 0)
-            {
-                tstatus.SelectedIndex = 0;
-            }
+            tstatus.SelectedIndex = 0;
             ttujuan.Focus();
-            lblMessage.Text = "Formulir dikosongkan.";
-            lblMessage.ForeColor = System.Drawing.Color.Black; // Reset message color
         }
 
         private void LoadData()
@@ -67,35 +57,25 @@ namespace Travel
             if (_cache.Contains(CacheKey))
             {
                 dt = _cache.Get(CacheKey) as DataTable;
-                lblMessage.Text = "Data dimuat dari cache.";
-                lblMessage.ForeColor = System.Drawing.Color.Blue;
             }
             else
             {
                 dt = new DataTable();
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                // Menggunakan SqlConnection
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
                     try
                     {
                         conn.Open();
                         string query = "SELECT * FROM jadwal";
+                        // Menggunakan SqlDataAdapter
                         SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
                         adapter.Fill(dt);
                         _cache.Add(CacheKey, dt, _policy);
-                        lblMessage.Text = "Data berhasil dimuat dari database.";
-                        lblMessage.ForeColor = System.Drawing.Color.Green;
-                    }
-                    catch (SqlException ex)
-                    {
-                        MessageBox.Show("Terjadi error database saat memuat data: " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        lblMessage.Text = "Gagal memuat data karena error database.";
-                        lblMessage.ForeColor = System.Drawing.Color.Red;
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Terjadi error tak terduga saat memuat data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        lblMessage.Text = "Gagal memuat data karena error tak terduga.";
-                        lblMessage.ForeColor = System.Drawing.Color.Red;
+                        MessageBox.Show("Failed to load data: " + ex.Message);
                     }
                 }
             }
@@ -104,30 +84,47 @@ namespace Travel
 
         private bool ValidateInput()
         {
-            if (string.IsNullOrWhiteSpace(ttujuan.Text)) { MessageBox.Show("Tujuan wajib diisi!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); ttujuan.Focus(); return false; }
-            if (string.IsNullOrWhiteSpace(twaktu.Text)) { MessageBox.Show("Waktu wajib diisi!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); twaktu.Focus(); return false; }
-            if (!TimeSpan.TryParse(twaktu.Text, out _)) { MessageBox.Show("Format waktu tidak valid! Gunakan HH:mm", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); twaktu.Focus(); return false; }
-            if (string.IsNullOrWhiteSpace(tharga.Text) || !decimal.TryParse(tharga.Text, out _)) { MessageBox.Show("Harga wajib diisi dan harus angka desimal!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); tharga.Focus(); return false; }
-            if (string.IsNullOrWhiteSpace(tkapasitas.Text) || !int.TryParse(tkapasitas.Text, out _)) { MessageBox.Show("Kapasitas wajib diisi dan harus angka!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); tkapasitas.Focus(); return false; }
-            if (string.IsNullOrWhiteSpace(tmerk.Text)) { MessageBox.Show("Merk mobil wajib diisi!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); tmerk.Focus(); return false; }
-            if (string.IsNullOrWhiteSpace(tmodel.Text)) { MessageBox.Show("Model mobil wajib diisi!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); tmodel.Focus(); return false; }
-            if (string.IsNullOrWhiteSpace(tplat.Text)) { MessageBox.Show("Plat nomor wajib diisi!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); tplat.Focus(); return false; }
-            if (tstatus.SelectedIndex < 0) { MessageBox.Show("Status wajib dipilih!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); tstatus.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(ttujuan.Text)) { MessageBox.Show("Tujuan wajib diisi!"); ttujuan.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(twaktu.Text)) { MessageBox.Show("Waktu wajib diisi!"); twaktu.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tharga.Text) || !decimal.TryParse(tharga.Text, out _)) { MessageBox.Show("Harga wajib diisi dan harus angka desimal!"); tharga.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tkapasitas.Text) || !int.TryParse(tkapasitas.Text, out _)) { MessageBox.Show("Kapasitas wajib diisi dan harus angka!"); tkapasitas.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tmerk.Text)) { MessageBox.Show("Merk mobil wajib diisi!"); tmerk.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tmodel.Text)) { MessageBox.Show("Model mobil wajib diisi!"); tmodel.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(tplat.Text)) { MessageBox.Show("Plat nomor wajib diisi!"); tplat.Focus(); return false; }
+            if (tstatus.SelectedIndex < 0) { MessageBox.Show("Status wajib dipilih!"); tstatus.Focus(); return false; }
             return true;
         }
 
+        // C#
         private void btnTambah_Click(object sender, EventArgs e)
         {
             if (!ValidateInput()) return;
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            if (!IsOnlyLetters(tmerk.Text.Trim()))
+            {
+                MessageBox.Show("Merek mobil hanya boleh berisi huruf!");
+                return;
+            }
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
                 SqlTransaction transaction = conn.BeginTransaction();
-
                 try
                 {
-                    string query = @"INSERT INTO jadwal (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status) VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
+                    // Cek duplikat plat nomor
+                    string checkQuery = "SELECT COUNT(*) FROM jadwal WHERE plat_nomor = @plat";
+                    SqlCommand checkCmd = new SqlCommand(checkQuery, conn, transaction);
+                    checkCmd.Parameters.AddWithValue("@plat", tplat.Text.Trim());
+                    int exists = (int)checkCmd.ExecuteScalar();
+                    if (exists > 0)
+                    {
+                        MessageBox.Show("Plat nomor sudah terdaftar, tidak boleh duplikat!");
+                        transaction.Rollback();
+                        return;
+                    }
+
+                    // Proses insert seperti biasa...
+                    string query = @"INSERT INTO jadwal (tujuan, tanggal, waktu, harga, kapasitas, merk_mobil, model_mobil, plat_nomor, status) 
+                                     VALUES (@tujuan, @tanggal, @waktu, @harga, @kapasitas, @merk, @model, @plat, @status)";
                     SqlCommand cmd = new SqlCommand(query, conn, transaction);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
                     cmd.Parameters.AddWithValue("@tanggal", ttanggal.Value.Date);
@@ -141,50 +138,37 @@ namespace Travel
                     cmd.ExecuteNonQuery();
 
                     transaction.Commit();
-                    MessageBox.Show("Data jadwal berhasil ditambah!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    lblMessage.Text = "Jadwal baru berhasil ditambahkan!";
-                    lblMessage.ForeColor = System.Drawing.Color.Green;
+                    MessageBox.Show("Data jadwal berhasil ditambah!");
                     _cache.Remove(CacheKey);
                     ClearForm();
                     LoadData();
                 }
-                catch (SqlException ex)
-                {
-                    transaction.Rollback();
-                    MessageBox.Show("Terjadi error database saat menambah data: " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal menambah data karena error database (rollback).";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                }
                 catch (Exception ex)
                 {
-                    transaction.Rollback();
-                    MessageBox.Show("Terjadi error tak terduga saat menambah data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal menambah data karena error tak terduga (rollback).";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                }
-                finally
-                {
-                    if (conn.State == ConnectionState.Open)
-                    {
-                        conn.Close();
-                    }
+                    try { transaction.Rollback(); } catch { }
+                    MessageBox.Show("Gagal menambah data: " + ex.Message);
                 }
             }
         }
 
+
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.SelectedRows.Count == 0) { MessageBox.Show("Pilih data yang akan diupdate!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            if (dataGridView1.SelectedRows.Count == 0) { MessageBox.Show("Pilih data yang akan diupdate!"); return; }
             if (!ValidateInput()) return;
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(kn.connectionString()))
             {
                 conn.Open();
+                if (!IsOnlyLetters(tmerk.Text.Trim()))
+                {
+                    MessageBox.Show("Merek mobil hanya boleh berisi huruf!");
+                    return;
+                }
                 SqlTransaction transaction = conn.BeginTransaction();
-
                 try
                 {
-                    string query = @"UPDATE jadwal SET tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status WHERE id_jadwal=@id";
+                    string query = @"UPDATE jadwal SET tujuan=@tujuan, tanggal=@tanggal, waktu=@waktu, harga=@harga, kapasitas=@kapasitas, 
+                             merk_mobil=@merk, model_mobil=@model, plat_nomor=@plat, status=@status WHERE id_jadwal=@id";
                     SqlCommand cmd = new SqlCommand(query, conn, transaction);
                     cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                     cmd.Parameters.AddWithValue("@tujuan", ttujuan.Text.Trim());
@@ -199,83 +183,46 @@ namespace Travel
                     cmd.ExecuteNonQuery();
 
                     transaction.Commit();
-                    MessageBox.Show("Data jadwal berhasil diupdate!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    lblMessage.Text = "Data jadwal berhasil diperbarui!";
-                    lblMessage.ForeColor = System.Drawing.Color.Green;
+                    MessageBox.Show("Data jadwal berhasil diupdate!");
                     _cache.Remove(CacheKey);
                     ClearForm();
                     LoadData();
                 }
-                catch (SqlException ex)
-                {
-                    transaction.Rollback();
-                    MessageBox.Show("Terjadi error database saat memperbarui data: " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal memperbarui data karena error database (rollback).";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                }
                 catch (Exception ex)
                 {
-                    transaction.Rollback();
-                    MessageBox.Show("Terjadi error tak terduga saat memperbarui data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal memperbarui data karena error tak terduga (rollback).";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                }
-                finally
-                {
-                    if (conn.State == ConnectionState.Open)
-                    {
-                        conn.Close();
-                    }
+                    try { transaction.Rollback(); } catch { }
+                    MessageBox.Show("Gagal update data: " + ex.Message);
                 }
             }
         }
 
+
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.SelectedRows.Count == 0) { MessageBox.Show("Pilih data yang akan dihapus!", "Validasi Input", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
-            DialogResult result = MessageBox.Show("Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi Hapus", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dataGridView1.SelectedRows.Count == 0) { MessageBox.Show("Pilih data yang akan dihapus!"); return; }
+            DialogResult result = MessageBox.Show("Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                // Menggunakan SqlConnection
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
-                    conn.Open();
-                    SqlTransaction transaction = conn.BeginTransaction();
-
                     try
                     {
+                        conn.Open();
                         string query = "DELETE FROM jadwal WHERE id_jadwal = @id";
-                        SqlCommand cmd = new SqlCommand(query, conn, transaction);
+                        // Menggunakan SqlCommand
+                        SqlCommand cmd = new SqlCommand(query, conn);
                         cmd.Parameters.AddWithValue("@id", dataGridView1.SelectedRows[0].Cells["id_jadwal"].Value);
                         cmd.ExecuteNonQuery();
 
-                        transaction.Commit();
-                        MessageBox.Show("Data jadwal berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        lblMessage.Text = "Data jadwal berhasil dihapus!";
-                        lblMessage.ForeColor = System.Drawing.Color.Green;
+                        MessageBox.Show("Data jadwal berhasil dihapus!");
                         _cache.Remove(CacheKey);
                         ClearForm();
                         LoadData();
                     }
-                    catch (SqlException ex)
-                    {
-                        transaction.Rollback();
-                        MessageBox.Show("Terjadi error database saat menghapus data: " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        lblMessage.Text = "Gagal menghapus data karena error database (rollback).";
-                        lblMessage.ForeColor = System.Drawing.Color.Red;
-                    }
                     catch (Exception ex)
                     {
-                        transaction.Rollback();
-                        MessageBox.Show("Terjadi error tak terduga saat menghapus data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        lblMessage.Text = "Gagal menghapus data karena error tak terduga (rollback).";
-                        lblMessage.ForeColor = System.Drawing.Color.Red;
-                    }
-                    finally
-                    {
-                        if (conn.State == ConnectionState.Open)
-                        {
-                            conn.Close();
-                        }
+                        MessageBox.Show("Gagal hapus data: " + ex.Message);
                     }
                 }
             }
@@ -286,9 +233,7 @@ namespace Travel
             _cache.Remove(CacheKey);
             LoadData();
             ClearForm();
-            MessageBox.Show("Data berhasil di-refresh!", "Refresh", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            lblMessage.Text = "Data telah di-refresh.";
-            lblMessage.ForeColor = System.Drawing.Color.Black;
+            MessageBox.Show("Data refreshed successfully!");
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -301,56 +246,26 @@ namespace Travel
                     ttanggal.Value = tgl;
                 else
                     ttanggal.Value = DateTime.Today;
-
-                object waktuValue = row.Cells["waktu"].Value;
-                if (waktuValue is TimeSpan ts)
-                {
-                    twaktu.Text = ts.ToString(@"hh\:mm");
-                }
-                else if (waktuValue != null && TimeSpan.TryParse(waktuValue.ToString(), out TimeSpan parsedTs))
-                {
-                    twaktu.Text = parsedTs.ToString(@"hh\:mm");
-                }
-                else
-                {
-                    twaktu.Text = waktuValue?.ToString() ?? string.Empty;
-                }
-
+                twaktu.Text = row.Cells["waktu"].Value?.ToString();
                 tharga.Text = row.Cells["harga"].Value?.ToString();
                 tkapasitas.Text = row.Cells["kapasitas"].Value?.ToString();
                 tmerk.Text = row.Cells["merk_mobil"].Value?.ToString();
                 tmodel.Text = row.Cells["model_mobil"].Value?.ToString();
                 tplat.Text = row.Cells["plat_nomor"].Value?.ToString();
-
-                string statusValue = row.Cells["status"].Value?.ToString();
-                if (statusValue != null)
-                {
-                    int index = tstatus.FindStringExact(statusValue);
-                    if (index != -1)
-                    {
-                        tstatus.SelectedIndex = index;
-                    }
-                    else
-                    {
-                        MessageBox.Show($"Status '{statusValue}' dari database tidak ditemukan di daftar dropdown status. Silakan periksa data atau item dropdown Anda.", "Ketidakcocokan Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        tstatus.SelectedIndex = -1;
-                    }
-                }
-                else
-                {
-                    tstatus.SelectedIndex = -1;
-                }
-                lblMessage.Text = "Data dipilih untuk diedit.";
-                lblMessage.ForeColor = System.Drawing.Color.Blue;
+                tstatus.SelectedItem = row.Cells["status"].Value?.ToString();
             }
         }
 
+        // Fungsi Impor dan Preview tidak berubah secara signifikan karena logika
+        // pembacaan Excel dan interaksi dengan PreviewForm tetap sama.
+        // Perubahan hanya pada connectionString yang diteruskan ke PreviewForm.
         private void btnImport_Click(object sender, EventArgs e)
         {
             try
             {
                 using (OpenFileDialog ofd = new OpenFileDialog())
                 {
+                    ofd.Filter = "Excel Files|";
                     ofd.Title = "Pilih File Excel";
 
                     if (ofd.ShowDialog() == DialogResult.OK)
@@ -362,8 +277,6 @@ namespace Travel
             catch (Exception ex)
             {
                 MessageBox.Show($"Error membuka file: {ex.Message}", "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                lblMessage.Text = $"Gagal membuka file: {ex.Message}";
-                lblMessage.ForeColor = System.Drawing.Color.Red;
             }
         }
 
@@ -389,7 +302,6 @@ namespace Travel
                     else { throw new Exception("Format file tidak didukung. Gunakan .xlsx"); }
 
                     ISheet sheet = workbook.GetSheetAt(0);
-                    // Start from row 1 to skip header (assuming header is in row 0)
                     for (int row = 1; row <= sheet.LastRowNum; row++)
                     {
                         IRow excelRow = sheet.GetRow(row);
@@ -397,20 +309,7 @@ namespace Travel
                         {
                             DataRow dataRow = dt.NewRow();
                             dataRow["tujuan"] = excelRow.GetCell(0)?.ToString() ?? string.Empty;
-                            // NPOI reads dates as numeric, need to convert from numeric date to DateTime
-                            if (excelRow.GetCell(1) != null && excelRow.GetCell(1).CellType == CellType.Numeric && DateUtil.IsCellDateFormatted(excelRow.GetCell(1)))
-                            {
-                                dataRow["tanggal"] = excelRow.GetCell(1).DateCellValue;
-                            }
-                            else if (DateTime.TryParse(excelRow.GetCell(1)?.ToString(), out var tgl))
-                            {
-                                dataRow["tanggal"] = tgl;
-                            }
-                            else
-                            {
-                                dataRow["tanggal"] = DateTime.Today;
-                            }
-
+                            dataRow["tanggal"] = DateTime.TryParse(excelRow.GetCell(1)?.ToString(), out var tgl) ? tgl : DateTime.Today;
                             dataRow["waktu"] = excelRow.GetCell(2)?.ToString() ?? string.Empty;
                             dataRow["harga"] = decimal.TryParse(excelRow.GetCell(3)?.ToString(), out var harga) ? harga : 0;
                             dataRow["kapasitas"] = int.TryParse(excelRow.GetCell(4)?.ToString(), out var kapasitas) ? kapasitas : 0;
@@ -423,156 +322,120 @@ namespace Travel
                     }
                 }
 
+                // Asumsikan PreviewForm juga diubah untuk menggunakan SqlConnection
                 PreviewForm previewForm = new PreviewForm(dt, connectionString);
                 if (previewForm.ShowDialog() == DialogResult.OK)
                 {
                     _cache.Remove(CacheKey);
                     LoadData();
                     MessageBox.Show("Data jadwal berhasil diimport!", "Import Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    lblMessage.Text = "Data jadwal berhasil diimport!";
-                    lblMessage.ForeColor = System.Drawing.Color.Green;
-                }
-                else
-                {
-                    lblMessage.Text = "Import data dibatalkan.";
-                    lblMessage.ForeColor = System.Drawing.Color.Orange;
+
+                    AnalyzeQuery("SELECT * FROM jadwal WHERE tujuan LIKE 'Yogyakarta%'");
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error membaca file: {ex.Message}", "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                lblMessage.Text = $"Gagal membaca file untuk preview: {ex.Message}";
-                lblMessage.ForeColor = System.Drawing.Color.Red;
             }
         }
 
-        private void ShowQueryStatistics(string sqlQuery)
+
+        private void AnalyzeQuery(string sqlQuery)
         {
-            var resultBuilder = new StringBuilder();
-            using (var conn = new SqlConnection(connectionString))
+            // Menggunakan kn.connectionString() untuk koneksi
+            using (var conn = new SqlConnection(kn.connectionString()))
             {
-                try
+                conn.InfoMessage += (s, e) =>
                 {
-                    // Capture messages from SET STATISTICS
-                    conn.InfoMessage += (s, e) => {
-                        resultBuilder.AppendLine(e.Message);
-                    };
-
-                    conn.Open();
-
-                    // Enable statistics
-                    using (var cmdStatsOn = new SqlCommand("SET STATISTICS IO ON; SET STATISTICS TIME ON;", conn))
-                    {
-                        cmdStatsOn.ExecuteNonQuery();
-                    }
-
-                    // Execute the actual query
-                    using (var cmdQuery = new SqlCommand(sqlQuery, conn))
-                    {
-                        if (sqlQuery.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
-                        {
-                            using (var reader = cmdQuery.ExecuteReader())
-                            {
-                                while (reader.Read())
-                                {
-                                    // Consume data
-                                }
-                            }
-                        }
-                        else
-                        {
-                            cmdQuery.ExecuteNonQuery(); // For INSERT, UPDATE, DELETE
-                        }
-                    }
-
-                    // Disable statistics
-                    using (var cmdStatsOff = new SqlCommand("SET STATISTICS IO OFF; SET STATISTICS TIME OFF;", conn))
-                    {
-                        cmdStatsOff.ExecuteNonQuery();
-                    }
-
-                    if (resultBuilder.Length > 0)
-                    {
-                        MessageBox.Show(resultBuilder.ToString(), "Query Performance Statistics");
-                        lblMessage.Text = "Statistik performa query berhasil diambil.";
-                        lblMessage.ForeColor = System.Drawing.Color.Green;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Tidak ada statistik performa yang dihasilkan.", "Query Performance Statistics");
-                        lblMessage.Text = "Tidak ada statistik performa yang dihasilkan.";
-                        lblMessage.ForeColor = System.Drawing.Color.Orange;
-                    }
-                }
-                catch (SqlException ex)
+                    // Tampilkan info statistik di Output pane Visual Studio
+                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    MessageBox.Show(e.Message, "STATISTICS INFO");
+                };
+                conn.Open();
+                var wrapped = @"
+                    SET STATISTICS IO ON;
+                    SET STATISTICS TIME ON;
+                    " + sqlQuery + @"
+                    SET STATISTICS IO OFF;
+                    SET STATISTICS TIME OFF;";
+                using (var cmd = new SqlCommand(wrapped, conn))
                 {
-                    MessageBox.Show("Terjadi error database saat mengambil statistik query: " + ex.Message, "Error Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal mengambil statistik query karena error database.";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Terjadi error tak terduga saat mengambil statistik query: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal mengambil statistik query karena error tak terduga.";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
 
-        private void btnAnalisis_Click(object sender, EventArgs e)
+        private void btnAnalyze_Click(object sender, EventArgs e)
         {
-            var queryToAnalyze = "SELECT * FROM jadwal WHERE kapasitas > 3 ORDER BY tanggal DESC";
-            ShowQueryStatistics(queryToAnalyze);
+            var heavyQuery = "SELECT * FROM jadwal WHERE tujuan LIKE 'Yogyakarta%'";
+            AnalyzeQuery(heavyQuery);
         }
 
-        // Metode baru untuk memastikan indeks ada, diadaptasi dari contoh referensi
-        private void EnsureIndexes()
+        private void btnDeleteAll_Click(object sender, EventArgs e)
         {
-            using (var conn = new SqlConnection(connectionString))
+            DialogResult result = MessageBox.Show(
+                "Apakah Anda yakin ingin menghapus SEMUA data jadwal?",
+                "Konfirmasi Hapus Semua",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
             {
-                try
+                using (SqlConnection conn = new SqlConnection(kn.connectionString()))
                 {
-                    conn.Open();
-                    var indexScript = @"
-                        IF OBJECT_ID('dbo.jadwal', 'U') IS NOT NULL
-                        BEGIN
-                            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='idx_jadwal_tujuan' AND object_id = OBJECT_ID('dbo.jadwal'))
-                                CREATE NONCLUSTERED INDEX idx_jadwal_tujuan ON dbo.jadwal (tujuan);
-
-                            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='idx_jadwal_tanggal' AND object_id = OBJECT_ID('dbo.jadwal'))
-                                CREATE NONCLUSTERED INDEX idx_jadwal_tanggal ON dbo.jadwal (tanggal);
-
-                            IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='idx_jadwal_tujuan_tanggal' AND object_id = OBJECT_ID('dbo.jadwal'))
-                                CREATE NONCLUSTERED INDEX idx_jadwal_tujuan_tanggal ON dbo.jadwal (tujuan, tanggal);
-                        END";
-                    using (var cmd = new SqlCommand(indexScript, conn))
+                    try
                     {
-                        cmd.ExecuteNonQuery();
+                        conn.Open();
+                        string query = "DELETE FROM jadwal";
+                        SqlCommand cmd = new SqlCommand(query, conn);
+                        int rows = cmd.ExecuteNonQuery();
+
+                        MessageBox.Show($"{rows} data jadwal berhasil dihapus!");
+                        _cache.Remove(CacheKey);
+                        ClearForm();
+                        LoadData();
                     }
-
-                    lblMessage.Text = "Indeks untuk tabel jadwal berhasil diverifikasi/dibuat.";
-                    lblMessage.ForeColor = System.Drawing.Color.Green;
-                }
-                catch (SqlException ex)
-                {
-                    MessageBox.Show("Terjadi error database saat memastikan indeks jadwal: " + ex.Message, "Error Indeks", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal memastikan indeks jadwal karena error database.";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Terjadi error tak terduga saat memastikan indeks jadwal: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblMessage.Text = "Gagal memastikan indeks jadwal karena error tak terduga.";
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                }
-                finally
-                {
-                    if (conn.State == ConnectionState.Open)
+                    catch (Exception ex)
                     {
-                        conn.Close();
+                        MessageBox.Show("Gagal menghapus semua data: " + ex.Message);
                     }
                 }
             }
+        }
+        // C#
+        private bool IsOnlyLetters(string text)
+        {
+            return System.Text.RegularExpressions.Regex.IsMatch(text, @"^[a-zA-Z\s]+$");
+        }
+        // C#
+
+        private void AnalyzeQueryWithStatistics(string sqlQuery)
+        {
+            using (var conn = new SqlConnection(kn.connectionString()))
+            {
+                conn.InfoMessage += (s, e) =>
+                {
+                    // Tampilkan info statistik di Output pane Visual Studio
+                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    MessageBox.Show(e.Message, "STATISTICS INFO");
+                };
+                conn.Open();
+                var wrapped = @"
+                    SET STATISTICS IO ON;
+                    SET STATISTICS TIME ON;
+                    " + sqlQuery + @"
+                    SET STATISTICS IO OFF;
+                    SET STATISTICS TIME OFF;";
+                using (var cmd = new SqlCommand(wrapped, conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
